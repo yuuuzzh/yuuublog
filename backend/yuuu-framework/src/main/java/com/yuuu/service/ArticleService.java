@@ -30,6 +30,11 @@ public interface ArticleService extends IService<Article> {
      */
     ResponseResult archives();
 
+    /**
+     * 相关文章推荐：同分类优先，不足时用热门补齐
+     */
+    ResponseResult relatedArticles(Long articleId, Integer size);
+
     ResponseResult articleDetailById(Long id);
 
     ResponseResult updateViewCount(Long articleId);

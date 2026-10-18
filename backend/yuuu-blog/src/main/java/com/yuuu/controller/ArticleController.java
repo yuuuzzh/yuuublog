@@ -47,6 +47,12 @@ public class ArticleController {
         return articleService.archives();
     }
 
+    //相关文章推荐（同分类优先，不足时热门补齐）
+    @GetMapping("/related")
+    public ResponseResult related(@RequestParam Long articleId, @RequestParam(required = false) Integer size){
+        return articleService.relatedArticles(articleId, size);
+    }
+
     //查询文章详情
     @GetMapping("/{id}")
     public ResponseResult articleDetailById(@PathVariable("id") Long id){

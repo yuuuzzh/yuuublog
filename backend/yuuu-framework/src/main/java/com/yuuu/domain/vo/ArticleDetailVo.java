@@ -39,4 +39,11 @@ public class ArticleDetailVo {
     private Long likes;
 
     private Date createTime;
+
+    //上一篇（更早发布的一篇）
+    private Long prevId;
+    private String prevTitle;
+    //下一篇（更晚发布的一篇）
+    private Long nextId;
+    private String nextTitle;
 }

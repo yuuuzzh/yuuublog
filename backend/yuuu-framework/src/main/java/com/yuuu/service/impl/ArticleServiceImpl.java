@@ -212,8 +212,83 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (category != null) {
             articleDetailVo.setCategoryName(category.getName());
         }
+        // 上下篇（按发布时间，仅统计已发布文章）
+        fillNeighbors(article, articleDetailVo);
         blogCacheManager.set(detailKey, articleDetailVo, SystemConstants.CACHE_TTL_SHORT);
         return ResponseResult.okResult(articleDetailVo);
+    }
+
+    /**
+     * 填充上一篇/下一篇
+     */
+    private void fillNeighbors(Article current, ArticleDetailVo vo) {
+        if (current.getCreateTime() == null) {
+            return;
+        }
+        LambdaQueryWrapper<Article> prevWrapper = new LambdaQueryWrapper<>();
+        prevWrapper.eq(Article::getStatus, SystemConstants.CATEGORY_STATUS_NORMAL)
+                .lt(Article::getCreateTime, current.getCreateTime())
+                .orderByDesc(Article::getCreateTime)
+                .last("limit 1");
+        Article prev = getOne(prevWrapper);
+        if (prev != null) {
+            vo.setPrevId(prev.getId());
+            vo.setPrevTitle(prev.getTitle());
+        }
+        LambdaQueryWrapper<Article> nextWrapper = new LambdaQueryWrapper<>();
+        nextWrapper.eq(Article::getStatus, SystemConstants.CATEGORY_STATUS_NORMAL)
+                .gt(Article::getCreateTime, current.getCreateTime())
+                .orderByAsc(Article::getCreateTime)
+                .last("limit 1");
+        Article next = getOne(nextWrapper);
+        if (next != null) {
+            vo.setNextId(next.getId());
+            vo.setNextTitle(next.getTitle());
+        }
+    }
+
+    @Override
+    public ResponseResult relatedArticles(Long articleId, Integer size) {
+        int n = (size == null || size <= 0) ? 6 : Math.min(size, 20);
+        List<RelatedArticleVo> result = new ArrayList<>();
+        Article current = getById(articleId);
+        if (current != null && current.getCategoryId() != null) {
+            LambdaQueryWrapper<Article> sameCategory = new LambdaQueryWrapper<>();
+            sameCategory.eq(Article::getStatus, SystemConstants.CATEGORY_STATUS_NORMAL)
+                    .eq(Article::getCategoryId, current.getCategoryId())
+                    .ne(Article::getId, articleId)
+                    .orderByDesc(Article::getCreateTime)
+                    .last("limit " + n);
+            result.addAll(toRelatedVo(list(sameCategory)));
+        }
+        // 同分类不足时用热门文章补齐
+        if (result.size() < n) {
+            List<Long> existIds = new ArrayList<>();
+            existIds.add(articleId);
+            for (RelatedArticleVo vo : result) {
+                existIds.add(vo.getId());
+            }
+            LambdaQueryWrapper<Article> hot = new LambdaQueryWrapper<>();
+            hot.eq(Article::getStatus, SystemConstants.CATEGORY_STATUS_NORMAL)
+                    .notIn(!existIds.isEmpty(), Article::getId, existIds)
+                    .orderByDesc(Article::getViewCount)
+                    .last("limit " + (n - result.size()));
+            result.addAll(toRelatedVo(list(hot)));
+        }
+        return ResponseResult.okResult(result);
+    }
+
+    private List<RelatedArticleVo> toRelatedVo(List<Article> articles) {
+        List<RelatedArticleVo> vos = new ArrayList<>();
+        for (Article article : articles) {
+            RelatedArticleVo vo = new RelatedArticleVo();
+            vo.setId(article.getId());
+            vo.setTitle(article.getTitle());
+            vo.setCreateTime(article.getCreateTime());
+            vo.setViewCount(article.getViewCount());
+            vos.add(vo);
+        }
+        return vos;
     }
 
 

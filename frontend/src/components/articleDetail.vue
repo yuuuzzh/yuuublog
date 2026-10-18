@@ -30,6 +30,31 @@
 
     <ImageLightbox :visible.sync="lbVisible" :list="lbList" :index.sync="lbIndex" />
 
+    <!-- 上下篇 -->
+    <div class="neighborBox" v-if="detailObj.prevId || detailObj.nextId">
+      <a v-if="detailObj.prevId" class="neighbor prev" :href="'#/DetailArticle?aid=' + detailObj.prevId">
+        <span class="nei-label"><i class="fa fa-fw fa-angle-left"></i>上一篇</span>
+        <span class="nei-title">{{ detailObj.prevTitle }}</span>
+      </a>
+      <span v-else class="neighbor disabled"><span class="nei-label">上一篇</span><span class="nei-title">没有了</span></span>
+      <a v-if="detailObj.nextId" class="neighbor next" :href="'#/DetailArticle?aid=' + detailObj.nextId">
+        <span class="nei-label">下一篇<i class="fa fa-fw fa-angle-right"></i></span>
+        <span class="nei-title">{{ detailObj.nextTitle }}</span>
+      </a>
+      <span v-else class="neighbor disabled"><span class="nei-label">下一篇</span><span class="nei-title">没有了</span></span>
+    </div>
+
+    <!-- 相关文章 -->
+    <div class="relatedBox" v-if="relatedList.length">
+      <h3 class="related-title"><i class="fa fa-fw fa-cubes"></i>相关文章</h3>
+      <ul class="related-list">
+        <li v-for="(item,index) in relatedList" :key="'r'+index">
+          <a :href="'#/DetailArticle?aid=' + item.id" target="_blank">{{ item.title }}</a>
+          <span class="related-meta">{{ showInitDate(item.createTime,'all') }} · {{ item.viewCount }} 次围观</span>
+        </li>
+      </ul>
+    </div>
+
     <div class="donate">
       <div class="donate-word">
         <span @click="pdonate = !pdonate">赞赏</span>
@@ -66,7 +91,7 @@
 
 <script>
 import { initDate } from '../utils/server.js'
-import { getArticle, updateViewCount } from '../api/article.js'
+import { getArticle, updateViewCount, relatedArticles } from '../api/article.js'
 import { mavonEditor } from 'mavon-editor'
 import * as FileSaver from 'file-saver';
 import request from "@/utils/request.js"
@@ -80,6 +105,7 @@ export default {
       aid: '',//文章ID
       pdonate: true,//打开赞赏控制,
       detailObj: {},//返回详情数据
+      relatedList: [],//相关文章
       haslogin: false,//是否已经登录
       title: '',//文章标题
       userId: '',//用户id
@@ -210,9 +236,18 @@ export default {
       this.lbIndex = index
       this.lbVisible = true
     },
+    getRelated: function () {
+      var that = this;
+      that.relatedList = [];
+      relatedArticles(that.aid, 6).then((response) => {
+        that.relatedList = response ? response : [];
+      }).catch(() => {
+        that.relatedList = [];
+      });
+    },
     getArticleDetail: function () {
-      getArticle(this.aid).then((response) => {
-        this.detailObj = response
+    getArticle(this.aid).then((response) => {
+      this.detailObj = response
         const markdownIt = mavonEditor.getMarkdownIt()
         // markdownIt.re
         this.detailObj.content = markdownIt.render(response.content);
@@ -247,6 +282,7 @@ export default {
       this.lbIndex = 0;
       //获取详情接口 
       this.getArticleDetail();
+      this.getRelated();
       updateViewCount(that.aid)
     }
   },
@@ -1347,6 +1383,116 @@ export default {
 @media (prefers-reduced-motion: reduce) {
   .article-content img.zoomable {
     transition: none;
+  }
+}
+
+/* ---------- 上下篇 ---------- */
+.neighborBox {
+  display: flex;
+  gap: 14px;
+  margin: 30px 0 6px;
+}
+
+.neighbor {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm, 10px);
+  background: var(--surface-2, rgba(79, 140, 255, .06));
+  color: var(--text);
+  text-decoration: none;
+  transition: transform .25s var(--ease, ease), background .25s var(--ease, ease);
+}
+
+a.neighbor:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(120deg, rgba(79, 140, 255, .12), rgba(123, 108, 255, .12));
+}
+
+.neighbor.next {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.neighbor.disabled {
+  opacity: .5;
+}
+
+.nei-label {
+  font-size: 12px;
+  color: var(--text-weak);
+}
+
+.nei-title {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* ---------- 相关文章 ---------- */
+.relatedBox {
+  margin: 22px 0 10px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border);
+}
+
+.related-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.related-list {
+  padding: 0;
+}
+
+.related-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  font-size: 14px;
+}
+
+.related-list a {
+  color: var(--text);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color .25s var(--ease, ease);
+}
+
+.related-list a:hover {
+  color: var(--brand);
+}
+
+.related-meta {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-weak);
+}
+
+@media screen and (max-width: 768px) {
+  .neighborBox {
+    flex-direction: column;
+  }
+
+  .neighbor.next {
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .related-list li {
+    flex-direction: column;
+    gap: 2px;
   }
 }
 </style>

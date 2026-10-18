@@ -45,6 +45,18 @@ export function archives() {
     })
 }
 
+// 相关文章推荐
+export function relatedArticles(articleId, size) {
+    return request({
+        url: '/article/related',
+        method: 'get',
+        headers: {
+            isToken: false
+        },
+        params: { articleId: articleId, size: size }
+    })
+}
+
 export function updateViewCount(articleId) {
     return request({
         url: '/article/updateViewCount/' + articleId,
