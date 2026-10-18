@@ -145,6 +145,8 @@ jobs:
     # 这里设上限让它失败并释放队列（classes 增量改造后正常应在几分钟内完成）
     timeout-minutes: 45
     steps:
+      # deploy 只下载产物，工作区里没有仓库文件；update_jar.py 需要从仓库取，必须先 checkout
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
