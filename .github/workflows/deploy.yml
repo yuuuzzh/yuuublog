@@ -139,11 +139,13 @@ jobs:
 
   deploy:
     needs: [changes, backend, admin, frontend]
-    if: always() && (needs.backend.result == 'success' || needs.admin.result == 'success' || needs.frontend.result == 'success')
+    # 只在手动触发（Run workflow）时部署：日常部署走 scripts/deploy-local.sh（本机构建直传，约 2 分钟）。
+    # push 时仍然跑构建，用于提前发现编译错误，但不碰服务器，避免与本地部署并发冲突。
+    if: always() && github.event_name == 'workflow_dispatch' && (needs.backend.result == 'success' || needs.admin.result == 'success' || needs.frontend.result == 'success')
     runs-on: ubuntu-latest
     # 跨境上传曾出现单次跑 2 小时仍不结束、并长期占用 concurrency 组的情况，
     # 这里设上限让它失败并释放队列，避免单个卡住的任务长期阻塞后续部署
-    timeout-minutes: 45
+    timeout-minutes: 240
     steps:
       # deploy 只下载产物，工作区里没有仓库文件；update_jar.py 需要从仓库取，必须先 checkout
       - uses: actions/checkout@v4
