@@ -53,6 +53,14 @@ public class ArticleController {
         return articleService.relatedArticles(articleId, size);
     }
 
+    //全文搜索（标题或正文）
+    @GetMapping("/searchPage")
+    public ResponseResult searchPage(@RequestParam String keyword,
+                                     @RequestParam(required = false) Integer pageNum,
+                                     @RequestParam(required = false) Integer pageSize){
+        return articleService.searchArticles(keyword, pageNum, pageSize);
+    }
+
     //查询文章详情
     @GetMapping("/{id}")
     public ResponseResult articleDetailById(@PathVariable("id") Long id){

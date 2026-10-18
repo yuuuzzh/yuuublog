@@ -278,6 +278,60 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         return ResponseResult.okResult(result);
     }
 
+    @Override
+    public ResponseResult searchArticles(String keyword, Integer pageNum, Integer pageSize) {
+        if (!StringUtils.hasText(keyword)) {
+            return ResponseResult.okResult(new PageVo(new ArrayList<SearchArticleVo>(), 0L));
+        }
+        String kw = keyword.trim();
+        int pn = (pageNum == null || pageNum < 1) ? 1 : pageNum;
+        int ps = (pageSize == null || pageSize < 1) ? 10 : Math.min(pageSize, 50);
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Article::getStatus, SystemConstants.CATEGORY_STATUS_NORMAL)
+                .and(w -> w.like(Article::getTitle, kw).or().like(Article::getContent, kw))
+                .orderByDesc(Article::getCreateTime);
+        Page<Article> page = new Page<>(pn, ps);
+        page(page, wrapper);
+
+        List<SearchArticleVo> vos = new ArrayList<>();
+        for (Article article : page.getRecords()) {
+            SearchArticleVo vo = new SearchArticleVo();
+            vo.setId(article.getId());
+            vo.setTitle(article.getTitle());
+            vo.setExcerpt(buildExcerpt(article.getContent(), kw));
+            vo.setCategoryId(article.getCategoryId());
+            vo.setCreateTime(article.getCreateTime());
+            vo.setViewCount(article.getViewCount());
+            vos.add(vo);
+        }
+        return ResponseResult.okResult(new PageVo(vos, page.getTotal()));
+    }
+
+    /**
+     * 取关键词附近的正文片段，并去掉常见 Markdown 标记，便于前端展示与高亮
+     */
+    private String buildExcerpt(String content, String keyword) {
+        if (!StringUtils.hasText(content)) {
+            return "";
+        }
+        String plain = content
+                .replaceAll("```[\\s\\S]*?```", " ")
+                .replaceAll("!\\[[^\\]]*\\]\\([^)]*\\)", " ")
+                .replaceAll("[^\\]]*\\]\\[[^)]*\\)", " ")
+                .replaceAll("[#>*`\\-\\|\\[\\]()]", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+        int idx = plain.toLowerCase().indexOf(keyword.toLowerCase());
+        int len = plain.length();
+        int radius = 60;
+        if (idx < 0) {
+            return len > 120 ? plain.substring(0, 120) + "…" : plain;
+        }
+        int start = Math.max(0, idx - radius);
+        int end = Math.min(len, idx + keyword.length() + radius);
+        return (start > 0 ? "…" : "") + plain.substring(start, end) + (end < len ? "…" : "");
+    }
+
     private List<RelatedArticleVo> toRelatedVo(List<Article> articles) {
         List<RelatedArticleVo> vos = new ArrayList<>();
         for (Article article : articles) {

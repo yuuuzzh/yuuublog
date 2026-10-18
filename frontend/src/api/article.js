@@ -57,6 +57,18 @@ export function relatedArticles(articleId, size) {
     })
 }
 
+// 全文搜索（标题或正文）
+export function searchArticles(query) {
+    return request({
+        url: '/article/searchPage',
+        method: 'get',
+        headers: {
+            isToken: false
+        },
+        params: query
+    })
+}
+
 export function updateViewCount(articleId) {
     return request({
         url: '/article/updateViewCount/' + articleId,

@@ -94,10 +94,22 @@ export default {
       return list.slice(0, 8)
     },
     commands: function () {
-      const kw = this.keyword.trim().toLowerCase()
+      const kw = this.keyword.trim()
+      const lower = kw.toLowerCase()
       const cmds = NAV.concat([{ key: 'theme', label: '切换主题（亮/暗/跟随系统）', icon: 'fa-moon-o', hint: 'T' }])
-      if (!kw) return cmds.slice(0, 6)
-      return cmds.filter(function (c) { return c.label.toLowerCase().indexOf(kw) > -1 }).slice(0, 6)
+      let list = lower
+        ? cmds.filter(function (c) { return c.label.toLowerCase().indexOf(lower) > -1 }).slice(0, 6)
+        : cmds.slice(0, 6)
+      // 本地结果只匹配标题/摘要，关键词存在时提供「全文搜索」入口（走后端标题+正文匹配）
+      if (kw) {
+        list = [{
+          key: 'fullsearch',
+          label: '全文搜索：' + kw,
+          icon: 'fa-search',
+          path: '/Search?keyword=' + encodeURIComponent(kw)
+        }].concat(list)
+      }
+      return list
     }
   },
   methods: {

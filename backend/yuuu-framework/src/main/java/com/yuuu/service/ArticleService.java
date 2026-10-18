@@ -35,6 +35,11 @@ public interface ArticleService extends IService<Article> {
      */
     ResponseResult relatedArticles(Long articleId, Integer size);
 
+    /**
+     * 全文搜索：标题或正文包含关键词的已发布文章
+     */
+    ResponseResult searchArticles(String keyword, Integer pageNum, Integer pageSize);
+
     ResponseResult articleDetailById(Long id);
 
     ResponseResult updateViewCount(Long articleId);
