@@ -207,6 +207,8 @@ jobs:
               local tmpd="/tmp/${name}_classes"
               rm -rf "$tmpd"; mkdir -p "$tmpd"
               unzip -q -o "$jar" 'BOOT-INF/classes/*' -d "$tmpd"
+              # rsync 不会自动创建多级父目录，classes 目录必须先建
+              ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" "mkdir -p ${STAGE_DIR}/classes/${name}"
               # --delete：CI 侧删掉的类不在目标端残留，否则会被重新写回 jar
               eval "$R --delete ${tmpd}/BOOT-INF/ \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/classes/${name}/\""
               echo "JAR_FULL_${name}=0" >> "$GITHUB_ENV"
