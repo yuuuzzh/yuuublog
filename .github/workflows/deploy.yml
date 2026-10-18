@@ -182,49 +182,15 @@ jobs:
             eval "$R artifacts/admin-dist/ \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/admin/\""
             ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" "ls -la ${STAGE_DIR}/admin/ | head -5"
           fi
-          # 上传 jar 更新脚本（服务器重建 fat jar 用，无嵌套 heredoc 风险）
-          eval "$R .github/scripts/update_jar.py \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/update_jar.py\""
-
-          # fat jar 约 100MB+，跨境链路全量上传要 1 小时以上。
-          # 依赖（BOOT-INF/lib）没变时，只上传 BOOT-INF/classes（几百 KB），由服务器本地重建 jar。
-          # 用 pom.xml 指纹判断依赖是否变化（比解析远端 jar 的 zip 列表更稳）
-          POM_FP=$(find backend -name pom.xml | sort | xargs md5sum | md5sum | awk '{print $1}')
-          ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" \
-            "cat ${STAGE_DIR}/poms.md5 2>/dev/null || echo none" > /tmp/remote_poms.txt 2>/dev/null || echo none > /tmp/remote_poms.txt
-          REMOTE_FP=$(head -1 /tmp/remote_poms.txt | tr -d '\r')
-          echo "pom fingerprint: local=$POM_FP remote=$REMOTE_FP"
-          if [ "$POM_FP" = "$REMOTE_FP" ]; then DEPS_CHANGED=0; else DEPS_CHANGED=1; fi
-          echo "deps_changed=$DEPS_CHANGED"
-
-          upload_jar() {
-            local jar="$1" name="$2" remote="$3"
-            if [ "$DEPS_CHANGED" = "1" ]; then
-              echo "[$name] 依赖有变化或远端无 jar -> 整包上传"
-              eval "$R \"$jar\" \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/jars/${name}.jar\""
-              echo "JAR_FULL_${name}=1" >> "$GITHUB_ENV"
-            else
-              echo "[$name] 依赖未变化 -> 只上传 BOOT-INF/classes"
-              local tmpd="/tmp/${name}_classes"
-              rm -rf "$tmpd"; mkdir -p "$tmpd/stage"
-              # 解压成 stage/BOOT-INF/classes/...，目标端目录结构才正确
-              unzip -q -o "$jar" 'BOOT-INF/classes/*' -d "$tmpd/stage"
-              # rsync 不会自动创建多级父目录，classes 目录必须先建
-              ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" "mkdir -p ${STAGE_DIR}/classes/${name}"
-              # --delete：CI 侧删掉的类不在目标端残留，否则会被重新写回 jar
-              eval "$R --delete ${tmpd}/stage/ \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/classes/${name}/\""
-              echo "JAR_FULL_${name}=0" >> "$GITHUB_ENV"
-            fi
-          }
-
+          # jar 采用整包 rsync 上传（--inplace --partial 增量块）。
+          # 曾尝试过只传 BOOT-INF/classes 再由服务器重建 jar，但两次把线上 jar 写坏导致服务起不来，已回退。
+          # 上传被中断会在暂存区留下损坏的 jar，Apply 阶段有 unzip -t 校验兜底。
           if [ -n "$JAR_ADMIN" ]; then
-            upload_jar "$JAR_ADMIN" yuuu-admin "${DEPLOY_ROOT}/backend/yuuu-admin.jar"
+            eval "$R \"$JAR_ADMIN\" \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/jars/yuuu-admin.jar\""
           fi
           if [ -n "$JAR_BLOG" ]; then
-            upload_jar "$JAR_BLOG" yuuu-blog "${DEPLOY_ROOT}/front/yuuu-blog.jar"
+            eval "$R \"$JAR_BLOG\" \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/jars/yuuu-blog.jar\""
           fi
-          # 记录本次部署对应的 pom 指纹，作为下次是否为增量部署的依据
-          echo "$POM_FP" | ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" "cat > ${STAGE_DIR}/poms.md5"
-          echo "poms.md5 updated: $POM_FP"
           if [ "$HAS_FRONT" = "1" ]; then
             eval "$R artifacts/frontend-dist/ \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/frontend/\""
             ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" "ls -la ${STAGE_DIR}/frontend/ | head -5"
@@ -273,25 +239,16 @@ jobs:
           apply_jar() {
             local name="$1" dir="$2" full="$3"
             local jar="$dir/$name.jar"
-            local classes="$STAGE/classes/$name/BOOT-INF/classes"
-            if [ -n "$full" ]; then
-              # 上传被中断会在暂存区留下损坏的 jar（rsync --inplace 部分写入），必须先校验
-              if ! unzip -t "$full" >/dev/null 2>&1; then
-                echo "$name: 整包完整性校验失败，跳过本次替换"
-                return 0
-              fi
-              cp -a "$jar" "$BK/" 2>/dev/null || true
-              cp -f "$full" "$jar"
-              # 用后即删：否则下次只传 classes 时会被残留的旧整包覆盖回去
-              rm -f "$full"
-              echo "$name: 整包替换"
-              APPLIED=1
-            elif [ -d "$classes" ]; then
-              cp -a "$jar" "$BK/" 2>/dev/null || true
-              python3 "$STAGE/update_jar.py" "$jar" "$classes" || { echo "$name: 增量重建失败，回滚"; cp -f "$BK/$name.jar" "$jar"; return 1; }
-              echo "$name: classes 增量更新"
-              APPLIED=1
+            if [ -z "$full" ]; then return 0; fi
+            # 上传被中断会在暂存区留下损坏的 jar（rsync --inplace 部分写入），必须先校验
+            if ! unzip -t "$full" >/dev/null 2>&1; then
+              echo "$name: 整包完整性校验失败，跳过本次替换"
+              return 0
             fi
+            cp -a "$jar" "$BK/" 2>/dev/null || true
+            cp -f "$full" "$jar"
+            echo "$name: 整包替换"
+            APPLIED=1
           }
           if [ -n "$JAR_ADMIN" ] || [ -n "$JAR_BLOG" ] || [ -d "$STAGE/classes/yuuu-admin/BOOT-INF/classes" ] || [ -d "$STAGE/classes/yuuu-blog/BOOT-INF/classes" ]; then
             systemctl stop yuuu-admin yuuu-blog || true
