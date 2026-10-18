@@ -24,7 +24,6 @@
                     </div>
                 </el-col>
                 <el-col :sm="24" :md="8">
-                    <yuuu-tagcloud></yuuu-tagcloud>
                     <yuuu-rightlist></yuuu-rightlist>
                 </el-col>
             </el-row>

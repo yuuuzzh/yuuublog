@@ -31,13 +31,27 @@ export default {
                 that.tagList = [];
             });
         },
-        // 文章越多，标签越大越亮
-        tagStyle(count) {
-            var c = count || 1;
-            var size = c >= 10 ? 16 : (c >= 5 ? 15 : 13);
+        // 文章越多，标签越大；按 id 确定性分配一组渐变色，避免每次渲染变色
+        tagStyle(item) {
+            var palettes = [
+                'linear-gradient(120deg, #4F8CFF, #7B6CFF)',
+                'linear-gradient(120deg, #FF7AC6, #FF9A8B)',
+                'linear-gradient(120deg, #38C6D9, #4F8CFF)',
+                'linear-gradient(120deg, #7B6CFF, #C86DD7)',
+                'linear-gradient(120deg, #FFB86C, #FF7AC6)',
+                'linear-gradient(120deg, #34D1A5, #38C6D9)'
+            ];
+            var idx = 0, s = String(item.id || '');
+            for (var i = 0; i < s.length; i++) {
+                idx += s.charCodeAt(i);
+            }
+            var count = item.articleCount || 1;
+            var size = count >= 10 ? 16 : (count >= 5 ? 15 : 13);
             return {
+                background: palettes[idx % palettes.length],
+                color: '#fff',
                 fontSize: size + 'px',
-                opacity: c >= 10 ? 1 : (c >= 5 ? .9 : .78)
+                boxShadow: '0 4px 14px rgba(79, 140, 255, .18)'
             };
         }
     },
@@ -74,18 +88,26 @@ export default {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 999px;
-    background: var(--surface-2, rgba(79, 140, 255, .08));
-    color: var(--text-weak);
+    color: #fff;
     text-decoration: none;
-    transition: all .25s var(--ease, ease);
+    letter-spacing: .5px;
+    transition: transform .25s var(--ease, ease), box-shadow .25s var(--ease, ease), filter .25s var(--ease, ease);
 }
 
 .tag-item:hover {
-    color: #fff;
-    background: linear-gradient(120deg, var(--brand), var(--brand-2));
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.05);
+    filter: brightness(1.08);
+    box-shadow: 0 8px 20px rgba(79, 140, 255, .35);
+}
+
+.tag-item .tag-count {
+    background: rgba(255, 255, 255, .22);
+    border-radius: 999px;
+    padding: 0 6px;
+    font-size: 11px;
+    line-height: 16px;
 }
 
 .tag-count {
