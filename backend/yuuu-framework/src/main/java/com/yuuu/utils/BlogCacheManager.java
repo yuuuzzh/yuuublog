@@ -73,8 +73,22 @@ public class BlogCacheManager {
             }
             redisCache.deleteObject(SystemConstants.HOT_ARTICLE_KEY);
             deleteByPrefix(SystemConstants.ARTICLE_LIST_KEY);
+            // sitemap / RSS 里包含文章链接，文章变化需同步失效
+            evictSite();
         } catch (Exception e) {
             log.warn("失效文章缓存失败（数据以数据库为准）：articleId={}, err={}", articleId, e.getMessage());
+        }
+    }
+
+    /**
+     * sitemap / RSS 失效
+     */
+    public void evictSite() {
+        try {
+            redisCache.deleteObject(SystemConstants.SITEMAP_KEY);
+            redisCache.deleteObject(SystemConstants.RSS_KEY);
+        } catch (Exception e) {
+            log.warn("失效 sitemap/RSS 缓存失败（数据以数据库为准）：err={}", e.getMessage());
         }
     }
 

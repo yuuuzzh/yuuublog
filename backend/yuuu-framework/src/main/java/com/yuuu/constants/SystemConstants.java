@@ -114,6 +114,10 @@ public class SystemConstants {
         public static final String LINK_LIST_KEY = "link:list";
         /** 前台关于我 */
         public static final String ABOUT_KEY = "about:front";
+        /** sitemap.xml 渲染结果 */
+        public static final String SITEMAP_KEY = "site:sitemap";
+        /** RSS 订阅源渲染结果 */
+        public static final String RSS_KEY = "site:rss";
 
         /** 缓存有效期（分钟）：变动较频繁的列表/详情 */
         public static final Integer CACHE_TTL_SHORT = 10;
