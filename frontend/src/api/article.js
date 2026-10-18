@@ -34,6 +34,17 @@ export function getArticle(articleId) {
     })
 }
 
+// 文章归档（按年月聚合）
+export function archives() {
+    return request({
+        url: '/article/archives',
+        method: 'get',
+        headers: {
+            isToken: false
+        }
+    })
+}
+
 export function updateViewCount(articleId) {
     return request({
         url: '/article/updateViewCount/' + articleId,

@@ -102,6 +102,14 @@ export default new Router({
 			name: 'Loading'
 		}, //注册登录
 		{
+			path: '/Archives',
+			component: resolve => require(['../pages/Archives.vue'], resolve),
+			meta: {
+				auth: true
+			},
+			name: 'Archives'
+		}, //文章归档
+		{
 			path: '/About',
 			component: resolve => require(['../pages/About.vue'], resolve),
 			meta: {

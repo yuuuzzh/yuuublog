@@ -39,6 +39,7 @@
         </div>
       </div>
     </section>
+    <yuuu-tagcloud></yuuu-tagcloud>
     <section class="rs4">
       <h2 class="ui label">热门文章</h2>
       <ul>
@@ -91,6 +92,7 @@
 
 <script>
 import { hotArticleList } from "../api/article";
+import tagcloud from "./tagcloud.vue";
 import request from "@/utils/request.js"
 export default {
   data() {
@@ -173,6 +175,7 @@ export default {
   },
   components: {
     //定义组件
+    "yuuu-tagcloud": tagcloud,
   },
 
   created() {

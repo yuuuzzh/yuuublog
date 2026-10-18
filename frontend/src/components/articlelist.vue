@@ -70,7 +70,8 @@ export default {
             queryParams: {
                 pageNum: 1,
                 pageSize: 10,
-                categoryId: 0
+                categoryId: 0,
+                tagId: 0
             },
             articleList: [],
             hasMore: true,
@@ -116,6 +117,7 @@ export default {
         routeChange: function () {
             var that = this;
             this.queryParams.categoryId = (that.$route.query.classId == undefined ? 0 : parseInt(that.$route.query.classId));//获取传参的classId
+            this.queryParams.tagId = (that.$route.query.tagId == undefined ? 0 : parseInt(that.$route.query.tagId));//按标签筛选
             this.showSearchShowList(true);
         }
     },

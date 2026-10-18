@@ -17,6 +17,7 @@
 							<el-menu-item index="/Reward"><i class="fa fa-wa fa-cny"></i> 赞赏</el-menu-item>
 							<el-menu-item index="/Friendslink"><i class="fa fa-wa fa-users"></i>友链</el-menu-item>
 							<el-menu-item index="/WordBoard"><i class="fa fa-wa fa-users"></i>留言板</el-menu-item>
+						<el-menu-item index="/Archives"><i class="fa fa-wa fa-calendar"></i>归档</el-menu-item>
 						<el-menu-item index="/About"><i class="fa fa-wa fa-id-card"></i>关于我</el-menu-item>
 							
 							
