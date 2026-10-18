@@ -23,7 +23,12 @@ import java.util.concurrent.CompletableFuture;
 public interface ArticleService extends IService<Article> {
     ResponseResult hotArticleList();
 
-    ResponseResult articleList(Integer pageNum, Integer pageSize, Long categoryId);
+    ResponseResult articleList(Integer pageNum, Integer pageSize, Long categoryId, Long tagId);
+
+    /**
+     * 前台归档：按年月聚合已发布文章
+     */
+    ResponseResult archives();
 
     ResponseResult articleDetailById(Long id);
 

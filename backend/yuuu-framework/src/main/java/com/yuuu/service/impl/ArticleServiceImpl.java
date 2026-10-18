@@ -47,6 +47,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -107,14 +108,26 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     }
 
     @Override
-    public ResponseResult articleList(Integer pageNum, Integer pageSize, Long categoryId) {
-        // 文章列表：按 分类+分页 维度缓存
-        String listKey = SystemConstants.ARTICLE_LIST_KEY + categoryId + ":" + pageNum + ":" + pageSize;
+    public ResponseResult articleList(Integer pageNum, Integer pageSize, Long categoryId, Long tagId) {
+        // 文章列表：按 分类+标签+分页 维度缓存
+        String listKey = SystemConstants.ARTICLE_LIST_KEY + "c" + categoryId + ":t" + tagId + ":" + pageNum + ":" + pageSize;
         Object listCache = blogCacheManager.get(listKey, PageVo.class);
         if (listCache != null) {
             return ResponseResult.okResult(listCache);
         }
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        // 标签筛选：先取该标签下的文章 id（空结果也缓存，避免每次都查一遍关联表）
+        if (tagId != null && tagId > 0) {
+            List<Long> articleIds = articleTagService
+                    .list(new LambdaQueryWrapper<ArticleTag>().eq(ArticleTag::getTagId, tagId))
+                    .stream().map(ArticleTag::getArticleId).collect(Collectors.toList());
+            if (articleIds.isEmpty()) {
+                PageVo empty = new PageVo(new ArrayList<ArticleListVo>(), 0L);
+                blogCacheManager.set(listKey, empty, SystemConstants.CACHE_TTL_SHORT);
+                return ResponseResult.okResult(empty);
+            }
+            queryWrapper.in(Article::getId, articleIds);
+        }
         // 分类条件
         queryWrapper.eq(Objects.nonNull(categoryId) && categoryId > 0, Article::getCategoryId, categoryId);
         // 正式发布的文章
@@ -138,6 +151,33 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         PageVo pageVo = new PageVo(articleListVos, page.getTotal());
         blogCacheManager.set(listKey, pageVo, SystemConstants.CACHE_TTL_SHORT);
         return ResponseResult.okResult(pageVo);
+    }
+
+    @Override
+    public ResponseResult archives() {
+        // 归档：按年月聚合已发布文章
+        List<ArchiveVo> cache = blogCacheManager.get(SystemConstants.ARCHIVE_KEY, List.class);
+        if (cache != null) {
+            return ResponseResult.okResult(cache);
+        }
+        List<Article> articles = list(new LambdaQueryWrapper<Article>()
+                .eq(Article::getStatus, SystemConstants.CATEGORY_STATUS_NORMAL)
+                .orderByDesc(Article::getCreateTime));
+        // 按 yyyy-MM 分组，保持时间倒序
+        Map<String, List<Article>> groupMap = articles.stream()
+                .collect(Collectors.groupingBy(
+                        article -> article.getCreateTime() == null ? "未知时间" : new SimpleDateFormat("yyyy-MM").format(article.getCreateTime()),
+                        LinkedHashMap::new,
+                        Collectors.toList()));
+        List<ArchiveVo> vos = new ArrayList<>();
+        for (Map.Entry<String, List<Article>> entry : groupMap.entrySet()) {
+            List<ArchiveArticleVo> items = entry.getValue().stream()
+                    .map(article -> new ArchiveArticleVo(article.getId(), article.getTitle(), article.getCreateTime()))
+                    .collect(Collectors.toList());
+            vos.add(new ArchiveVo(entry.getKey(), items.size(), items));
+        }
+        blogCacheManager.set(SystemConstants.ARCHIVE_KEY, vos, SystemConstants.CACHE_TTL_LONG);
+        return ResponseResult.okResult(vos);
     }
 
     @Override

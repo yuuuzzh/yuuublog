@@ -35,10 +35,16 @@ public class ArticleController {
         return articleService.hotArticleList();
     }
 
-    //查询文章列表
+    //查询文章列表（categoryId 按分类，tagId 按标签，两者可同时使用）
     @GetMapping("/articleList")
-    public ResponseResult articleList(Integer pageNum,Integer pageSize,Long categoryId){
-        return articleService.articleList(pageNum,pageSize,categoryId);
+    public ResponseResult articleList(Integer pageNum,Integer pageSize,Long categoryId,Long tagId){
+        return articleService.articleList(pageNum,pageSize,categoryId,tagId);
+    }
+
+    //文章归档（按年月聚合）
+    @GetMapping("/archives")
+    public ResponseResult archives(){
+        return articleService.archives();
     }
 
     //查询文章详情

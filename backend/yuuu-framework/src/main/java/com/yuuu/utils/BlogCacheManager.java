@@ -73,6 +73,9 @@ public class BlogCacheManager {
             }
             redisCache.deleteObject(SystemConstants.HOT_ARTICLE_KEY);
             deleteByPrefix(SystemConstants.ARTICLE_LIST_KEY);
+            // 标签云的文章数、归档分组都会随文章变化
+            redisCache.deleteObject(SystemConstants.TAG_LIST_KEY);
+            redisCache.deleteObject(SystemConstants.ARCHIVE_KEY);
             // sitemap / RSS 里包含文章链接，文章变化需同步失效
             evictSite();
         } catch (Exception e) {
@@ -112,6 +115,17 @@ public class BlogCacheManager {
             redisCache.deleteObject(SystemConstants.LINK_LIST_KEY);
         } catch (Exception e) {
             log.warn("失效友链缓存失败（数据以数据库为准）：err={}", e.getMessage());
+        }
+    }
+
+    /**
+     * 标签新增/修改/删除后失效：标签云（文章数会变）
+     */
+    public void evictTag() {
+        try {
+            redisCache.deleteObject(SystemConstants.TAG_LIST_KEY);
+        } catch (Exception e) {
+            log.warn("失效标签缓存失败（数据以数据库为准）：err={}", e.getMessage());
         }
     }
 

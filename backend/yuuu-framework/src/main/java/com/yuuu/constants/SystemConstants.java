@@ -118,6 +118,10 @@ public class SystemConstants {
         public static final String SITEMAP_KEY = "site:sitemap";
         /** RSS 订阅源渲染结果 */
         public static final String RSS_KEY = "site:rss";
+        /** 前台标签云 */
+        public static final String TAG_LIST_KEY = "tag:listWithCount";
+        /** 前台文章归档 */
+        public static final String ARCHIVE_KEY = "article:archive";
 
         /** 缓存有效期（分钟）：变动较频繁的列表/详情 */
         public static final Integer CACHE_TTL_SHORT = 10;

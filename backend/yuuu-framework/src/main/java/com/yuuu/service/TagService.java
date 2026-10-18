@@ -5,6 +5,7 @@ import com.yuuu.domain.ResponseResult;
 import com.yuuu.domain.dto.TagDto;
 import com.yuuu.domain.dto.TagListDto;
 import com.yuuu.domain.entity.Tag;
+import com.yuuu.domain.vo.TagCountVo;
 
 import java.util.List;
 
@@ -29,5 +30,10 @@ public interface TagService extends IService<Tag> {
     ResponseResult updateTag(TagDto tagDto);
 
     ResponseResult listAllTag();
+
+    /**
+     * 前台标签云：标签 + 已发布文章数（含缓存）
+     */
+    List<TagCountVo> listTagWithCount();
 }
 
