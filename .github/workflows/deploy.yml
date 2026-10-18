@@ -19,7 +19,9 @@ on:
         default: false
 
 concurrency:
-  group: yuuublog-deploy
+  # 组名带版本后缀：历史上出现过单次部署僵死 2 小时、长期占用队列且无法取消的情况，
+  # 换组名即可让新任务绕开被占用的旧组（旧任务自然结束后可再改回或保留）
+  group: yuuublog-deploy-v2
   cancel-in-progress: false
 
 env:
