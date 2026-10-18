@@ -274,6 +274,11 @@ jobs:
             local jar="$dir/$name.jar"
             local classes="$STAGE/classes/$name/BOOT-INF/classes"
             if [ -n "$full" ]; then
+              # 上传被中断会在暂存区留下损坏的 jar（rsync --inplace 部分写入），必须先校验
+              if ! unzip -t "$full" >/dev/null 2>&1; then
+                echo "$name: 整包完整性校验失败，跳过本次替换"
+                return 0
+              fi
               cp -a "$jar" "$BK/" 2>/dev/null || true
               cp -f "$full" "$jar"
               # 用后即删：否则下次只传 classes 时会被残留的旧整包覆盖回去
