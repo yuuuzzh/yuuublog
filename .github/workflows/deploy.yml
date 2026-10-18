@@ -90,6 +90,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.admin == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -114,6 +115,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -137,6 +139,9 @@ jobs:
     needs: [changes, backend, admin, frontend]
     if: always() && (needs.backend.result == 'success' || needs.admin.result == 'success' || needs.frontend.result == 'success')
     runs-on: ubuntu-latest
+    # 跨境上传曾出现单次跑 2 小时仍不结束、并长期占用 concurrency 组的情况，
+    # 这里设上限让它失败并释放队列（classes 增量改造后正常应在几分钟内完成）
+    timeout-minutes: 45
     steps:
       - uses: actions/download-artifact@v4
         with:
