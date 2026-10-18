@@ -39,6 +39,11 @@ def main():
     if not os.path.isdir(classes_dir):
         print("classes dir not found: %s" % classes_dir)
         return 1
+    # 目录结构必须是 .../BOOT-INF/classes，否则会把类写到 jar 的错误路径、直接破坏启动
+    norm = classes_dir.rstrip("/").replace("\\", "/")
+    if not norm.endswith("BOOT-INF/classes"):
+        print("classes dir must end with BOOT-INF/classes, got: %s" % classes_dir)
+        return 1
 
     new_files = collect(classes_dir)
     if not new_files:
