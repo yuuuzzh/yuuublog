@@ -187,19 +187,18 @@ jobs:
 
           # fat jar 约 100MB+，跨境链路全量上传要 1 小时以上。
           # 依赖（BOOT-INF/lib）没变时，只上传 BOOT-INF/classes（几百 KB），由服务器本地重建 jar。
-          jar_deps_changed() {
-            local jar="$1" remote="$2" name="$3"
-            ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" \
-              "test -f '$remote' && unzip -l '$remote' | awk '/BOOT-INF\\/lib\\//{print \$4}' | sort" \
-              > "/tmp/remote_${name}.txt" 2>/dev/null || true
-            unzip -l "$jar" | awk '/BOOT-INF\/lib\//{print $4}' | sort > "/tmp/local_${name}.txt"
-            if [ ! -s "/tmp/remote_${name}.txt" ]; then return 0; fi
-            diff -q "/tmp/local_${name}.txt" "/tmp/remote_${name}.txt" >/dev/null && return 1 || return 0
-          }
+          # 用 pom.xml 指纹判断依赖是否变化（比解析远端 jar 的 zip 列表更稳）
+          POM_FP=$(find backend -name pom.xml | sort | xargs md5sum | md5sum | awk '{print $1}')
+          ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" \
+            "cat ${STAGE_DIR}/poms.md5 2>/dev/null || echo none" > /tmp/remote_poms.txt 2>/dev/null || echo none > /tmp/remote_poms.txt
+          REMOTE_FP=$(head -1 /tmp/remote_poms.txt | tr -d '\r')
+          echo "pom fingerprint: local=$POM_FP remote=$REMOTE_FP"
+          if [ "$POM_FP" = "$REMOTE_FP" ]; then DEPS_CHANGED=0; else DEPS_CHANGED=1; fi
+          echo "deps_changed=$DEPS_CHANGED"
 
           upload_jar() {
             local jar="$1" name="$2" remote="$3"
-            if jar_deps_changed "$jar" "$remote" "$name"; then
+            if [ "$DEPS_CHANGED" = "1" ]; then
               echo "[$name] 依赖有变化或远端无 jar -> 整包上传"
               eval "$R \"$jar\" \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/jars/${name}.jar\""
               echo "JAR_FULL_${name}=1" >> "$GITHUB_ENV"
@@ -220,6 +219,9 @@ jobs:
           if [ -n "$JAR_BLOG" ]; then
             upload_jar "$JAR_BLOG" yuuu-blog "${DEPLOY_ROOT}/front/yuuu-blog.jar"
           fi
+          # 记录本次部署对应的 pom 指纹，作为下次是否为增量部署的依据
+          echo "$POM_FP" | ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" "cat > ${STAGE_DIR}/poms.md5"
+          echo "poms.md5 updated: $POM_FP"
           if [ "$HAS_FRONT" = "1" ]; then
             eval "$R artifacts/frontend-dist/ \"${SERVER_USER}@${SERVER_HOST}:${STAGE_DIR}/frontend/\""
             ssh -p "${SSH_PORT}" "${SERVER_USER}@${SERVER_HOST}" "ls -la ${STAGE_DIR}/frontend/ | head -5"
