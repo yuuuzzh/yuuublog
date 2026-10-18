@@ -232,7 +232,7 @@ jobs:
             grep -rq "data-theme" "$DEPLOY_ROOT/front/dist/static/css/" || echo "WARN: 设计系统样式未出现在产物中"
           fi
 
-          # 3) jar：整包优先，其次用上传的 BOOT-INF/classes 本地增量重建
+          # 3) jar：整包替换（上传中断留下的损坏 jar 会被完整性校验拦下）
           JAR_ADMIN=$(find "$STAGE/jars" -name 'yuuu-admin.jar' 2>/dev/null | head -1)
           JAR_BLOG=$(find "$STAGE/jars" -name 'yuuu-blog.jar' 2>/dev/null | head -1)
           APPLIED=0
@@ -250,7 +250,7 @@ jobs:
             echo "$name: 整包替换"
             APPLIED=1
           }
-          if [ -n "$JAR_ADMIN" ] || [ -n "$JAR_BLOG" ] || [ -d "$STAGE/classes/yuuu-admin/BOOT-INF/classes" ] || [ -d "$STAGE/classes/yuuu-blog/BOOT-INF/classes" ]; then
+          if [ -n "$JAR_ADMIN" ] || [ -n "$JAR_BLOG" ]; then
             systemctl stop yuuu-admin yuuu-blog || true
             apply_jar yuuu-admin "$DEPLOY_ROOT/backend" "$JAR_ADMIN"
             apply_jar yuuu-blog "$DEPLOY_ROOT/front" "$JAR_BLOG"
