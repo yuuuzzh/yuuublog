@@ -142,7 +142,7 @@ jobs:
     if: always() && (needs.backend.result == 'success' || needs.admin.result == 'success' || needs.frontend.result == 'success')
     runs-on: ubuntu-latest
     # 跨境上传曾出现单次跑 2 小时仍不结束、并长期占用 concurrency 组的情况，
-    # 这里设上限让它失败并释放队列（classes 增量改造后正常应在几分钟内完成）
+    # 这里设上限让它失败并释放队列，避免单个卡住的任务长期阻塞后续部署
     timeout-minutes: 45
     steps:
       # deploy 只下载产物，工作区里没有仓库文件；update_jar.py 需要从仓库取，必须先 checkout
