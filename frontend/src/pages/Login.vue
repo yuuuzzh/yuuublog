@@ -198,6 +198,7 @@ export default {
             fullscreenLoading: false,//全屏loading
             urlstate: 0,//重新注册
             captcha: '',
+            captchaKey: '',
             captchaUrl: '',
             captchaUrlUpdate: '',
             nnickName: '',
@@ -364,7 +365,9 @@ export default {
         refreshCaptcha() {//这个是登录验证码
             const promise = getCaptchaImg();
             promise.then((response) => {
-                this.captchaUrl = 'data:image/png;base64,' + response;
+                // 验证码令牌：提交登录时一起带上，保证只校验本次获取的验证码
+                this.captchaKey = response.captchaKey || '';
+                this.captchaUrl = 'data:image/png;base64,' + response.captchaImageBase64;
             }).catch(error => {
                 console.error(error); // 打印错误信息
                 this.$message.error('获取验证码失败：' + error.message);
@@ -379,7 +382,7 @@ export default {
             }
         },
         gotoHome: function () {//用户登录
-            userLogin(this.username, encryptPassword.encrypt(this.password), this.captcha).then((response) => {
+            userLogin(this.username, encryptPassword.encrypt(this.password), this.captcha, this.captchaKey).then((response) => {
                 // 登录成功记录token和用户信息，登录失败给对应提示
                 setToken(response.token)
                 // 存储用户信息

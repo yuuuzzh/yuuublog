@@ -20,4 +20,6 @@ public class UserLoginDto {
     private String password;
     //验证码
     private String captcha;
+    //验证码令牌（获取验证码时下发，用于定位本次验证码）
+    private String captchaKey;
 }

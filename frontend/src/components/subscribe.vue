@@ -27,6 +27,7 @@ export default {
         return {
             email: '',
             captcha: '',
+            captchaKey: '',
             captchaUrl: '',
             loading: false
         }
@@ -38,8 +39,10 @@ export default {
         refreshCaptcha() {
             var that = this;
             that.captchaUrl = '';
-            getCaptchaImg().then((base64) => {
-                that.captchaUrl = 'data:image/png;base64,' + base64;
+            that.captchaKey = '';
+            getCaptchaImg().then((res) => {
+                that.captchaKey = res.captchaKey || '';
+                that.captchaUrl = 'data:image/png;base64,' + res.captchaImageBase64;
             }).catch(() => {
                 that.captchaUrl = '';
             });
@@ -56,7 +59,7 @@ export default {
                 return;
             }
             that.loading = true;
-            subscribe(mail, that.captcha.trim()).then(() => {
+            subscribe(mail, that.captcha.trim(), that.captchaKey).then(() => {
                 that.email = '';
                 that.$message && that.$message.success('订阅成功，感谢关注～');
                 that.refreshCaptcha();

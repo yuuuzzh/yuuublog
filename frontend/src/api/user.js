@@ -1,14 +1,14 @@
 import request from '@/utils/request'
 
 // 登录
-export function userLogin(username, password, captcha) {
+export function userLogin(username, password, captcha, captchaKey) {
     return request({
         url: '/login',
         method: 'post',
         headers: {
             isToken: false
         },
-        data: { 'username': username, 'password': password, 'captcha': captcha }
+        data: { 'username': username, 'password': password, 'captcha': captcha, 'captchaKey': captchaKey }
     })
 }
 //发送邮箱验证码

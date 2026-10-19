@@ -44,16 +44,19 @@ public class SubscribeController {
     @PostMapping
     public ResponseResult subscribe(@RequestParam String email,
                                    @RequestParam(required = false) String captcha,
+                                   @RequestParam(required = false) String captchaKey,
                                    HttpServletRequest request) {
         if (!org.springframework.util.StringUtils.hasText(captcha)) {
             return ResponseResult.errorResult(AppHttpCodeEnum.INPUT_ERROR.getCode(), "请输入验证码");
         }
-        // 验证码一次性校验
-        String cached = redisCache.getCacheObject(SystemConstants.CAPTCHA_KEY + captcha.trim());
-        if (cached == null) {
+        // 按令牌定位本次验证码，校验后立即失效（不会误伤其他人的验证码）
+        String cached = org.springframework.util.StringUtils.hasText(captchaKey)
+                ? redisCache.getCacheObject(SystemConstants.CAPTCHA_KEY + captchaKey)
+                : null;
+        if (cached == null || !cached.equalsIgnoreCase(captcha.trim())) {
             return ResponseResult.errorResult(AppHttpCodeEnum.INPUT_ERROR.getCode(), "验证码不正确或已过期");
         }
-        redisCache.deleteObject(SystemConstants.CAPTCHA_KEY + captcha.trim());
+        redisCache.deleteObject(SystemConstants.CAPTCHA_KEY + captchaKey);
 
         // 同 IP 限流（Redis 异常时拒绝，避免限流被绕过）
         String ip = IPUtil.getIpAddr(request);

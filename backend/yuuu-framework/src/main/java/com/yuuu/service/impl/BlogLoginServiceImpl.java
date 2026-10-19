@@ -59,13 +59,16 @@ public class BlogLoginServiceImpl implements BlogLoginService {
         if (Objects.isNull(authenticate)){
             throw new RuntimeException("用户名或密码错误!");
         }
-        //获取用户输入的验证码
+        //获取用户输入的验证码：按令牌定位本次验证码，校验后立即失效
         String captchaValue = user.getCaptcha();
-        String cacheKey = redisCache.getCacheObject(SystemConstants.CAPTCHA_KEY + captchaValue);
-        if (cacheKey == null || !captchaValue.equals(cacheKey)){
+        String captchaKey = user.getCaptchaKey();
+        String cachedCaptcha = org.springframework.util.StringUtils.hasText(captchaKey)
+                ? redisCache.getCacheObject(SystemConstants.CAPTCHA_KEY + captchaKey)
+                : null;
+        if (cachedCaptcha == null || captchaValue == null || !cachedCaptcha.equalsIgnoreCase(captchaValue.trim())){
             return ResponseResult.errorResult(602,"请再检查一下验证码哟~");
-        }else {
-            redisCache.deleteObject(SystemConstants.CAPTCHA_KEY + captchaValue);
+        } else {
+            redisCache.deleteObject(SystemConstants.CAPTCHA_KEY + captchaKey);
         }
         //认证通过，用户名和密码都正确
         //获取userId，生成token
