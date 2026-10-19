@@ -15,6 +15,7 @@ import com.yuuu.domain.vo.*;
 import com.yuuu.enums.AppHttpCodeEnum;
 import com.yuuu.mapper.ArticleMapper;
 import com.yuuu.service.ArticleService;
+import com.yuuu.service.SubscribeService;
 import com.yuuu.service.ArticleTagService;
 import com.yuuu.service.CategoryService;
 import com.yuuu.service.LikedService;
@@ -83,6 +84,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Autowired
     private BlogCacheManager blogCacheManager;
+
+    @Autowired
+    private SubscribeService subscribeService;
 
     @Override
     public ResponseResult hotArticleList() {
@@ -377,6 +381,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 新增后失效前台缓存：列表/详情/热门/分类（分类列表源自发布文章）
         blogCacheManager.evictArticle(article.getId());
         blogCacheManager.evictCategory();
+        // 已发布的新文章推送给订阅者（异步，失败不影响发布结果）
+        if (SystemConstants.CATEGORY_STATUS_NORMAL.equals(article.getStatus())) {
+            subscribeService.notifyNewArticle(article);
+        }
         return ResponseResult.okResult();
     }
 
@@ -429,6 +437,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 修改后失效前台缓存（标题/置顶/状态/分类都可能在本次变更）
         blogCacheManager.evictArticle(article.getId());
         blogCacheManager.evictCategory();
+        // 草稿/下架转为发布时才推送，避免每次编辑都打扰订阅者
+        Article before = getById(article.getId());
+        if (SystemConstants.CATEGORY_STATUS_NORMAL.equals(article1.getStatus())
+                && (before == null || !SystemConstants.CATEGORY_STATUS_NORMAL.equals(before.getStatus()))) {
+            subscribeService.notifyNewArticle(article1);
+        }
         return ResponseResult.okResult();
 
     }

@@ -642,6 +642,28 @@ CREATE TABLE `yuuu_about`  (
 INSERT INTO `yuuu_about` (`id`, `name`, `title`, `avatar`, `cover`, `summary`, `content`, `skills`, `location`, `email`, `github`, `website`, `status`, `create_time`, `update_time`, `del_flag`)
 VALUES (1, 'yuuu', '一直在路上', '', '', '生命的意义在于不顺从', '', '', '', '', '', '', '0', NOW(), NOW(), 0);
 
+-- ----------------------------
+-- 邮件订阅（新文章发布后推送给订阅者）
+-- ----------------------------
+DROP TABLE IF EXISTS `yuuu_subscribe`;
+CREATE TABLE `yuuu_subscribe`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `email` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '订阅邮箱',
+  `token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '退订令牌',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '0' COMMENT '状态（0订阅中 1已退订）',
+  `source` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'web' COMMENT '来源',
+  `create_time` datetime NULL DEFAULT NULL,
+  `update_time` datetime NULL DEFAULT NULL,
+  `del_flag` int NULL DEFAULT 0 COMMENT '删除标志（0未删除 1已删除）',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_subscribe_email`(`email`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '邮件订阅' ROW_FORMAT = Dynamic;
+
+-- 后台菜单：邮件订阅（父级为「内容管理」2017）
+INSERT INTO `sys_menu` VALUES (2073, '邮件订阅', 2017, 6, 'subscribe', 'content/subscribe/index', 1, 'C', '0', '0', 'content:subscribe:list', 'message', 1, NOW(), 1, NOW(), '', '0');
+INSERT INTO `sys_menu` VALUES (2074, '邮件订阅查询', 2073, 1, '', NULL, 1, 'F', '0', '0', 'content:subscribe:query', '#', 1, NOW(), 1, NOW(), '', '0');
+INSERT INTO `sys_menu` VALUES (2075, '邮件订阅删除', 2073, 2, '', NULL, 1, 'F', '0', '0', 'content:subscribe:remove', '#', 1, NOW(), 1, NOW(), '', '0');
+
 -- 后台菜单：关于我（父级为「内容管理」2017）
 INSERT INTO `sys_menu` VALUES (2070, '关于我', 2017, 5, 'about', 'content/about/index', 1, 'C', '0', '0', 'content:about:list', 'user', 1, NOW(), 1, NOW(), '', '0');
 INSERT INTO `sys_menu` VALUES (2071, '关于我查询', 2070, 1, '', NULL, 1, 'F', '0', '0', 'content:about:query', '#', 1, NOW(), 1, NOW(), '', '0');

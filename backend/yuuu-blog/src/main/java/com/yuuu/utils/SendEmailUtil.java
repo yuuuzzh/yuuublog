@@ -30,13 +30,14 @@ public class SendEmailUtil {
     private static SmsMailType[] smsMailTypes;
     private static ReplyMailType[] replyMailTypes;
 
-    @Value("${mail.username}")
+    // 后台(admin)模块没有 mail 配置，这里给默认值兜底，避免启动时注入失败
+    @Value("${mail.username:}")
     private String username;
 
     @Autowired
     public SendEmailUtil(JavaMailSender mailSender,
-                         @Value("${mail.smsTemplateDir}") String smsTemplateDir,
-                         @Value("${mail.replyTemplateDir}") String replyTemplateDir) {
+                         @Value("${mail.smsTemplateDir:templates/mail/sms}") String smsTemplateDir,
+                         @Value("${mail.replyTemplateDir:templates/mail/reply}") String replyTemplateDir) {
         this.mailSender = mailSender;
         smsEngine = TemplateUtil.createEngine(new TemplateConfig(smsTemplateDir, TemplateConfig.ResourceMode.CLASSPATH));
         replyEngine = TemplateUtil.createEngine(new TemplateConfig(replyTemplateDir, TemplateConfig.ResourceMode.CLASSPATH));

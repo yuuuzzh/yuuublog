@@ -158,6 +158,16 @@ export const constantRoutes = [
     }]
   },
   {
+    path: '/content/subscribe',
+    component: Layout,
+    children: [{
+      path: '/',
+      name: 'subscribe',
+      component: () => import('@/views/content/subscribe/index'),
+      hidden: true
+    }]
+  },
+  {
     path: '/log/login',
     component: Layout,
     children: [{

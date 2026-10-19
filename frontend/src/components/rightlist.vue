@@ -39,6 +39,7 @@
         </div>
       </div>
     </section>
+    <yuuu-subscribe></yuuu-subscribe>
     <yuuu-tagcloud></yuuu-tagcloud>
     <section class="rs4">
       <h2 class="ui label">热门文章</h2>
@@ -93,6 +94,7 @@
 <script>
 import { hotArticleList } from "../api/article";
 import tagcloud from "./tagcloud.vue";
+import subscribeBox from "./subscribe.vue";
 import request from "@/utils/request.js"
 export default {
   data() {
@@ -176,6 +178,7 @@ export default {
   components: {
     //定义组件
     "yuuu-tagcloud": tagcloud,
+    "yuuu-subscribe": subscribeBox,
   },
 
   created() {
