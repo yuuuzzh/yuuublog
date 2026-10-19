@@ -20,6 +20,12 @@
         <div class="stat-card">
           <span class="stat-label">总点赞</span><b class="stat-num">{{ overview.likeCount || 0 }}</b>
         </div>
+        <div class="stat-card">
+          <span class="stat-label">累计访客</span><b class="stat-num">{{ visit.total || 0 }}</b>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">今日访客</span><b class="stat-num">{{ visit.today || 0 }}</b>
+        </div>
       </div>
       <div class="stats-charts">
         <div class="chart-box">
@@ -27,6 +33,12 @@
         </div>
         <div class="chart-box">
           <div ref="topChart" class="chart"></div>
+        </div>
+        <div class="chart-box">
+          <div ref="trendChart" class="chart"></div>
+        </div>
+        <div class="chart-box">
+          <div ref="osChart" class="chart"></div>
         </div>
       </div>
     </div>
@@ -85,6 +97,7 @@ export default {
       overview: {},
       categoryStats: [],
       topArticles: [],
+      visit: {},
       charts: []
     }
   },
@@ -108,6 +121,7 @@ export default {
         self.overview = (res && res.overview) || {}
         self.categoryStats = (res && res.categoryStats) || []
         self.topArticles = (res && res.topArticles) || []
+        self.visit = (res && res.visit) || {}
         self.$nextTick(self.renderCharts)
       }).catch(function () {
         // 统计失败不影响首页其它内容展示
@@ -116,6 +130,46 @@ export default {
     renderCharts() {
       this.renderCategory()
       this.renderTop()
+      this.renderTrend()
+      this.renderOs()
+    },
+    renderTrend() {
+      if (!this.$refs.trendChart || !this.visit.trend || !this.visit.trend.length) return
+      const chart = echarts.init(this.$refs.trendChart)
+      const trend = this.visit.trend
+      chart.setOption({
+        title: { text: '近 30 天访客趋势', textStyle: { fontSize: 14 } },
+        tooltip: { trigger: 'axis' },
+        grid: { left: 50, right: 20, top: 50, bottom: 40 },
+        xAxis: {
+          type: 'category',
+          data: trend.map(function (i) { return i.day }),
+          axisLabel: { interval: 4 }
+        },
+        yAxis: { type: 'value', minInterval: 1 },
+        series: [{
+          type: 'line',
+          smooth: true,
+          areaStyle: { color: 'rgba(79,140,255,.18)' },
+          itemStyle: { color: '#4F8CFF' },
+          data: trend.map(function (i) { return i.count })
+        }]
+      })
+      this.charts.push(chart)
+    },
+    renderOs() {
+      if (!this.$refs.osChart || !this.visit.os || !this.visit.os.length) return
+      const chart = echarts.init(this.$refs.osChart)
+      chart.setOption({
+        title: { text: '访客系统分布 TOP6', textStyle: { fontSize: 14 } },
+        tooltip: { trigger: 'item' },
+        series: [{
+          type: 'pie',
+          radius: ['35%', '58%'],
+          data: this.visit.os.map(function (i) { return { name: i.name, value: i.count } })
+        }]
+      })
+      this.charts.push(chart)
     },
     renderCategory() {
       if (!this.$refs.categoryChart || !this.categoryStats.length) return
