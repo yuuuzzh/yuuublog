@@ -65,7 +65,7 @@ fi
 
 if [ "${SCOPE}" = "admin" ] || [ "${SCOPE}" = "all" ]; then
   echo "==> 构建后台 dist"
-  (cd admin && npm run build:prod)
+  (cd admin && NODE_OPTIONS=--openssl-legacy-provider npm run build:prod)
 fi
 
 # ---------- 上传 ----------
