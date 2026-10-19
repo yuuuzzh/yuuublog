@@ -44,7 +44,7 @@
       <h2 class="ui label">热门文章</h2>
       <ul>
         <li v-for="(item, index) in browseList" :key="'browseList' + index">
-          <a :href="'#/DetailArticle?aid=' + item.id" target="_blank">{{
+          <a :href="'/DetailArticle?aid=' + item.id" target="_blank">{{
             item.title
           }}</a>
           —— {{ item.viewCount }} 次围观

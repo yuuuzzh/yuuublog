@@ -15,7 +15,7 @@
                                 <ul class="archive-list">
                                     <li v-for="(item,i) in group.articles" :key="'a'+i">
                                         <span class="archive-day">{{ showInitDate(item.createTime,'date') }}</span>
-                                        <a :href="'#/DetailArticle?aid='+item.id" target="_blank">{{ item.title }}</a>
+                                        <a :href="'/DetailArticle?aid='+item.id" target="_blank">{{ item.title }}</a>
                                     </li>
                                 </ul>
                             </div>

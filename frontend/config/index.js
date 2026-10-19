@@ -43,7 +43,8 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: './',
+    // history 模式下必须绝对路径：相对路径会在多级 URL（如 /DetailArticle?aid=1）下错位
+    assetsPublicPath: '/',
 
     /**
      * Source Maps

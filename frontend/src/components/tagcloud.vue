@@ -4,7 +4,7 @@
         <h1 class="tag-title">标签云</h1>
         <div class="tag-list">
             <a v-for="(item,index) in tagList" :key="'t'+index" class="tag-item"
-                :href="'#/Share?tagId='+item.id" :style="tagStyle(item.articleCount)">
+                :href="'/Share?tagId='+item.id" :style="tagStyle(item.articleCount)">
                 {{ item.name }}<span class="tag-count">{{ item.articleCount }}</span>
             </a>
         </div>

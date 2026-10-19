@@ -3,6 +3,9 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 export default new Router({
+	// history 模式：URL 不再带 #，搜索引擎才能收录具体页面（hash 后面的内容爬虫不索引）。
+	// 依赖服务端把所有未知路径回落到 index.html，nginx 已配置 try_files ... /index.html
+	mode: 'history',
 	scrollBehavior(to, from, savePosition) { // 在点击浏览器的“前进/后退”，或者切换导航的时候触发。
 		if (savePosition) {
 			return savePosition;

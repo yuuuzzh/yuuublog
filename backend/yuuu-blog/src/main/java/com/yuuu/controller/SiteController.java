@@ -55,12 +55,12 @@ public class SiteController {
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         sb.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         // 首页
-        appendUrl(sb, siteUrl + "/#/Home", "1.0", null);
+        appendUrl(sb, siteUrl + "/Home", "1.0", null);
         // 固定页
-        appendUrl(sb, siteUrl + "/#/Share?classId=0", "0.6", null);
-        appendUrl(sb, siteUrl + "/#/About", "0.6", null);
-        appendUrl(sb, siteUrl + "/#/FriendsLink", "0.4", null);
-        appendUrl(sb, siteUrl + "/#/WordBoard", "0.4", null);
+        appendUrl(sb, siteUrl + "/Share?classId=0", "0.6", null);
+        appendUrl(sb, siteUrl + "/About", "0.6", null);
+        appendUrl(sb, siteUrl + "/FriendsLink", "0.4", null);
+        appendUrl(sb, siteUrl + "/WordBoard", "0.4", null);
         // 文章
         List<Article> articles = publishedArticles(SITEMAP_MAX);
         for (Article article : articles) {
@@ -135,7 +135,7 @@ public class SiteController {
     }
 
     private String articleUrl(Long id) {
-        return siteUrl + "/#/DetailArticle?aid=" + id;
+        return siteUrl + "/DetailArticle?aid=" + id;
     }
 
     private void appendUrl(StringBuilder sb, String loc, String priority, Date lastMod) {

@@ -7,7 +7,7 @@
     </span>
     <header>
       <h1>
-        <!-- <a :href="'#/DetailShare?aid='+detailObj.id" target="_blank">
+        <!-- <a :href="'/DetailShare?aid='+detailObj.id" target="_blank">
                         {{detailObj.title}}
                     </a> -->
         <a target="_blank">
@@ -21,7 +21,7 @@
         <i class="fa fa-fw fa-clock-o"></i>约 {{ minutes }} 分钟读完（{{ words }} 字）
       </h2>
       <div class="ui label">
-        <a :href="'#/Share?classId=' + detailObj.categoryId">{{ detailObj.categoryName }}</a>
+        <a :href="'/Share?classId=' + detailObj.categoryId">{{ detailObj.categoryName }}</a>
       </div>
     </header>
     <ArticleToc :toc="toc" />
@@ -32,12 +32,12 @@
 
     <!-- 上下篇 -->
     <div class="neighborBox" v-if="detailObj.prevId || detailObj.nextId">
-      <a v-if="detailObj.prevId" class="neighbor prev" :href="'#/DetailArticle?aid=' + detailObj.prevId">
+      <a v-if="detailObj.prevId" class="neighbor prev" :href="'/DetailArticle?aid=' + detailObj.prevId">
         <span class="nei-label"><i class="fa fa-fw fa-angle-left"></i>上一篇</span>
         <span class="nei-title">{{ detailObj.prevTitle }}</span>
       </a>
       <span v-else class="neighbor disabled"><span class="nei-label">上一篇</span><span class="nei-title">没有了</span></span>
-      <a v-if="detailObj.nextId" class="neighbor next" :href="'#/DetailArticle?aid=' + detailObj.nextId">
+      <a v-if="detailObj.nextId" class="neighbor next" :href="'/DetailArticle?aid=' + detailObj.nextId">
         <span class="nei-label">下一篇<i class="fa fa-fw fa-angle-right"></i></span>
         <span class="nei-title">{{ detailObj.nextTitle }}</span>
       </a>
@@ -49,7 +49,7 @@
       <h3 class="related-title"><i class="fa fa-fw fa-cubes"></i>相关文章</h3>
       <ul class="related-list">
         <li v-for="(item,index) in relatedList" :key="'r'+index">
-          <a :href="'#/DetailArticle?aid=' + item.id" target="_blank">{{ item.title }}</a>
+          <a :href="'/DetailArticle?aid=' + item.id" target="_blank">{{ item.title }}</a>
           <span class="related-meta">{{ showInitDate(item.createTime,'all') }} · {{ item.viewCount }} 次围观</span>
         </li>
       </ul>

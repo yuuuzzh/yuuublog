@@ -19,7 +19,7 @@
                         <ul class="result-list" v-if="list.length">
                             <li v-for="(item,index) in list" :key="'s'+index" class="result-item">
                                 <h2 class="result-title">
-                                    <a :href="'#/DetailArticle?aid='+item.id" target="_blank"
+                                    <a :href="'/DetailArticle?aid='+item.id" target="_blank"
                                         v-html="highlight(item.title)"></a>
                                 </h2>
                                 <p class="result-excerpt" v-html="highlight(item.excerpt)"></p>

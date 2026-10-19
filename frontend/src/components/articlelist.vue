@@ -19,7 +19,7 @@
 
         <el-col :span="24" v-for="(item,index) in articleList" :key="'article'+index">
             <article class="article-card hover-lift" v-reveal="Math.min(index,5)*70">
-                <a class="card-cover" :href="'#/DetailArticle?aid='+item.id" target="_blank">
+                <a class="card-cover" :href="'/DetailArticle?aid='+item.id" target="_blank">
                     <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.title" loading="lazy">
                     <span v-else class="cover-fallback" :style="coverStyle(item.title)">
                         <i>{{ coverInitial(item.title) }}</i>
@@ -30,9 +30,9 @@
                     </span>
                 </a>
                 <div class="card-body">
-                    <a class="chip cat" :href="'#/Share?classId='+item.categoryId">{{item.categoryName}}</a>
+                    <a class="chip cat" :href="'/Share?classId='+item.categoryId">{{item.categoryName}}</a>
                     <h2 class="card-title">
-                        <a :href="'#/DetailArticle?aid='+item.id" target="_blank">{{item.title}}</a>
+                        <a :href="'/DetailArticle?aid='+item.id" target="_blank">{{item.title}}</a>
                     </h2>
                     <p class="card-summary">{{item.summary}}</p>
                     <div class="card-meta">
@@ -40,7 +40,7 @@
                         <span><i class="fa fa-fw fa-eye"></i>{{item.viewCount}} 次围观</span>
                         <span><i class="fa fa-fw fa-heart"></i>{{ item.likes }} 次点赞</span>
                     </div>
-                    <a class="read-more" :href="'#/DetailArticle?aid='+item.id" target="_blank">
+                    <a class="read-more" :href="'/DetailArticle?aid='+item.id" target="_blank">
                         阅读全文
                         <i class="fa fa-arrow-right"></i>
                     </a>

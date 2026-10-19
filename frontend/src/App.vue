@@ -48,6 +48,30 @@ export default {
         }
     },
     methods: {
+        // history 模式下站内普通 <a href="/xxx"> 会整页刷新，这里接管为前端路由跳转
+        onInternalLinkClick(e) {
+            var target = e.target;
+            var link = null;
+            while (target && target !== document) {
+                if (target.tagName === 'A') {
+                    link = target;
+                    break;
+                }
+                target = target.parentNode;
+            }
+            if (!link) return;
+            var href = link.getAttribute('href') || '';
+            if (href.indexOf('#') === 0) return; // 页内锚点
+            if (link.target === '_blank' || link.hasAttribute('download')) return; // 新窗口/下载交给浏览器
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+            if (href.indexOf(location.origin) === 0) {
+                href = href.substring(location.origin.length);
+            }
+            // 只接管站内页面路径，放过接口与静态资源
+            if (href.indexOf('/') !== 0 || href.indexOf('/api/') === 0 || href.indexOf('/static/') === 0) return;
+            e.preventDefault();
+            this.$router.push(href);
+        },
         zoomIn() {
             const image = document.getElementById('fix-image');
             image.style.transition = 'transform 1s';
@@ -147,6 +171,12 @@ export default {
         window.addEventListener('keydown', this.onHotkey);
         window.addEventListener('touchstart', this.onTouchStart, { passive: true });
         window.addEventListener('touchend', this.onTouchEnd, { passive: true });
+        window.addEventListener('click', this.onInternalLinkClick);
+        // 兼容已流传的旧 hash 链接：/#/DetailArticle?aid=25 -> /DetailArticle?aid=25，
+        // 否则 history 模式下 hash 会被忽略而落到首页
+        if (window.location.hash && window.location.hash.indexOf('#/') === 0) {
+            this.$router.replace(window.location.hash.substring(1));
+        }
         this.handleScroll();
     },
     destroyed() {
@@ -155,6 +185,7 @@ export default {
         window.removeEventListener('keydown', this.onHotkey);
         window.removeEventListener('touchstart', this.onTouchStart);
         window.removeEventListener('touchend', this.onTouchEnd);
+        window.removeEventListener('click', this.onInternalLinkClick);
     },
 }
 </script>
