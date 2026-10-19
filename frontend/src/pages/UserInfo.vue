@@ -55,6 +55,7 @@
                     <h1>
                             个人中心
                         <span class="gotoEdit" @click="isEdit=!isEdit"><i class="fa fa-wa fa-edit"></i>编辑</span>
+                        <a class="gotoEdit" href="/Favorite"><i class="fa fa-wa fa-star"></i>我的收藏</a>
                     </h1>
 
                 </header>

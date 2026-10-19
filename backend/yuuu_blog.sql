@@ -659,6 +659,20 @@ CREATE TABLE `yuuu_subscribe`  (
   UNIQUE INDEX `uk_subscribe_email`(`email`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '邮件订阅' ROW_FORMAT = Dynamic;
 
+-- ----------------------------
+-- 文章收藏（稍后读）
+-- ----------------------------
+DROP TABLE IF EXISTS `yuuu_favorite`;
+CREATE TABLE `yuuu_favorite`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `user_id` bigint NOT NULL DEFAULT 0 COMMENT '用户id',
+  `article_id` bigint NOT NULL DEFAULT 0 COMMENT '文章id',
+  `create_time` datetime NULL DEFAULT NULL,
+  `del_flag` int NULL DEFAULT 0 COMMENT '删除标志（0未删除 1已删除）',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_favorite_user_article`(`user_id`, `article_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '文章收藏' ROW_FORMAT = Dynamic;
+
 -- 评论审核状态字段：0待审核 1通过 2屏蔽（已有评论默认通过）
 ALTER TABLE `yuuu_comment` ADD COLUMN `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '1' COMMENT '状态（0待审核 1通过 2屏蔽）' AFTER `type`;
 UPDATE `yuuu_comment` SET `status` = '1' WHERE `status` IS NULL;

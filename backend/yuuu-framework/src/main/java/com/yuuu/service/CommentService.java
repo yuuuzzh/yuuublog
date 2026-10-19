@@ -23,6 +23,11 @@ public interface CommentService extends IService<Comment> {
     ResponseResult getLikes(Long id);
 
     /**
+     * 删除自己的评论（只能删自己发的）
+     */
+    ResponseResult deleteOwnComment(Long id);
+
+    /**
      * 后台评论列表（含文章标题、评论人，便于审核）
      */
     ResponseResult adminList(Integer pageNum, Integer pageSize, String status, String type, String keyword);

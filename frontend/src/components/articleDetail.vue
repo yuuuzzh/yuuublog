@@ -63,6 +63,10 @@
           <img style="width: 35px; height: 35px; cursor: pointer;" :src="iconSrcDis" @click="toggleDisLike" />
           <el-button style="margin-left: 5px;" size="small" type="primary" @click="forwardPage"
             icon="el-icon-share"></el-button>
+          <el-button size="small" :type="favorited ? 'warning' : 'primary'" @click="toggleFavorite"
+            :icon="favorited ? 'el-icon-star-on' : 'el-icon-star-off'">
+            {{ favorited ? '已收藏' : '收藏' }}
+          </el-button>
           <el-button size="small" type="primary" @click="downloadById" icon="el-icon-download"></el-button>
         </div>
       </div>
@@ -92,6 +96,7 @@
 <script>
 import { initDate } from '../utils/server.js'
 import { getArticle, updateViewCount, relatedArticles } from '../api/article.js'
+import { checkFavorite, toggleFavorite } from '../api/favorite.js'
 import { mavonEditor } from 'mavon-editor'
 import * as FileSaver from 'file-saver';
 import request from "@/utils/request.js"
@@ -104,6 +109,7 @@ export default {
     return {
       aid: '',//文章ID
       pdonate: true,//打开赞赏控制,
+      favorited: false,//是否已收藏
       detailObj: {},//返回详情数据
       relatedList: [],//相关文章
       haslogin: false,//是否已经登录
@@ -245,6 +251,31 @@ export default {
         that.relatedList = [];
       });
     },
+    loadFavorite: function () {
+      var that = this;
+      that.favorited = false;
+      // 未登录时不查询（接口需要登录）
+      if (!localStorage.getItem('userInfo')) {
+        return;
+      }
+      checkFavorite(that.aid).then((response) => {
+        that.favorited = !!response;
+      }).catch(() => {
+        that.favorited = false;
+      });
+    },
+    toggleFavorite: function () {
+      var that = this;
+      if (!localStorage.getItem('userInfo')) {
+        localStorage.setItem('logUrl', that.$route.fullPath);
+        that.$router.push({ path: '/Login', query: { login: 1 } });
+        return;
+      }
+      toggleFavorite(that.aid).then((response) => {
+        that.favorited = !!response;
+        that.$message && that.$message.success(that.favorited ? '已加入收藏' : '已取消收藏');
+      }).catch(() => { });
+    },
     getArticleDetail: function () {
     getArticle(this.aid).then((response) => {
       this.detailObj = response
@@ -283,6 +314,7 @@ export default {
       //获取详情接口 
       this.getArticleDetail();
       this.getRelated();
+      this.loadFavorite();
       updateViewCount(that.aid)
     }
   },

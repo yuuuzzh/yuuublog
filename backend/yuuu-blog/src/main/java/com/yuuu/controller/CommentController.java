@@ -67,4 +67,10 @@ public class CommentController {
     public ResponseResult getLikes(@PathVariable("id") Long id){
         return commentService.getLikes(id);
     }
+
+    // 删除自己的评论
+    @DeleteMapping("/{id}")
+    public ResponseResult deleteOwnComment(@PathVariable("id") Long id){
+        return commentService.deleteOwnComment(id);
+    }
 }

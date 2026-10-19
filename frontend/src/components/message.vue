@@ -55,6 +55,10 @@
                                     @click="respondMsg(item.id, item.id, item.createBy)">
                                     回复
                                 </div>
+                                <div v-if="isMine(item.createBy)" class="tmsg-delete"
+                                    @click="deleteComment(item.id)">
+                                    删除
+                                </div>
                                 <div style="display: flex;">
                                     <div>
                                         <img width="20px" height="20px"
@@ -93,6 +97,10 @@
                                                 @click="respondMsg(item.id, citem.id, citem.createBy)">
                                                 回复
                                             </div>
+                                            <div v-if="isMine(citem.createBy)" class="tmsg-delete"
+                                                @click="deleteComment(citem.id)">
+                                                删除
+                                            </div>
                                             <div style="display: flex;">
                                                 <div>
                                                     <img width="20px" height="20px"
@@ -122,7 +130,7 @@
 </template>
 
 <script>
-import { sendComment, getArticleComment, getLinkComment } from '../api/comment.js'
+import { sendComment, getArticleComment, getLinkComment, deleteOwnComment } from '../api/comment.js'
 import { getToken } from '../utils/auth.js'
 import request from "@/utils/request.js"
 export default {
@@ -234,6 +242,34 @@ export default {
         }
     },
     methods: { //事件处理器
+        isMine: function (createBy) {
+            // 只有自己的评论才显示删除按钮
+            var info = localStorage.getItem('userInfo');
+            if (!info || createBy === undefined || createBy === null) {
+                return false;
+            }
+            try {
+                var mine = JSON.parse(info);
+                return String(mine.id) === String(createBy);
+            } catch (e) {
+                return false;
+            }
+        },
+        deleteComment: function (id) {
+            var that = this;
+            that.$confirm('确认删除这条评论？', '提示', {
+                confirmButtonText: '删除',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(function () {
+                deleteOwnComment(id).then(function () {
+                    that.$message && that.$message.success('已删除');
+                    that.routeChange();
+                }).catch(function () {
+                    that.$message && that.$message.error('删除失败');
+                });
+            }).catch(function () { });
+        },
         setData(initData, result) {
             var msg = result.rows;
             if (initData) {
@@ -1197,6 +1233,17 @@ export default {
     font-size: 12px;
     color: #64609E;
     cursor: pointer;
+}
+
+.tmsg-c-item article section .tmsg-delete {
+    margin: 10px 0;
+    font-size: 12px;
+    color: #909399;
+    cursor: pointer;
+}
+
+.tmsg-c-item article section .tmsg-delete:hover {
+    color: #f56c6c;
 }
 
 /* ================= 留言/评论：点赞动效 + 表情面板适配 ================= */

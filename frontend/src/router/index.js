@@ -129,6 +129,14 @@ export default new Router({
 			name: 'Aboutme'
 		}, //关于我
 		{
+			path: '/Favorite',
+			component: resolve => require(['../pages/Favorite.vue'], resolve),
+			meta: {
+				auth: true
+			},
+			name: 'Favorite'
+		}, //我的收藏
+		{
 			path: '/UserInfo',
 			component: resolve => require(['../pages/UserInfo.vue'], resolve),
 			meta: {

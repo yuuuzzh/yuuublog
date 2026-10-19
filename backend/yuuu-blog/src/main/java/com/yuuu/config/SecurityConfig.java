@@ -60,8 +60,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/user/userInfo").authenticated()
                 .antMatchers("/ip").authenticated()
                 .antMatchers("/comment").authenticated()
+                // 删除自己的评论：/comment/{id}
+                .antMatchers("/comment/**").authenticated()
                 .antMatchers("/like/**").authenticated()
                 .antMatchers("/chat/**").authenticated()
+                // 文章收藏（需要登录）
+                .antMatchers("/favorite/**").authenticated()
                 // 除上面外的所有请求全部不需要认证即可访问
                 .anyRequest().permitAll();
 

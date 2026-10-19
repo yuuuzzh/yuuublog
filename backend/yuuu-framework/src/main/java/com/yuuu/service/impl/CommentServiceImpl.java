@@ -20,6 +20,7 @@ import com.yuuu.service.ArticleService;
 import com.yuuu.service.SensitiveService;
 import com.yuuu.service.UserService;
 import com.yuuu.utils.BeanCopyUtils;
+import com.yuuu.utils.SecurityUtils;
 import com.yuuu.utils.SensitiveWordUtil;
 import io.jsonwebtoken.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +95,23 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     public ResponseResult getLikes(Long id) {
         Long likes = getById(id).getLikes();
         return ResponseResult.okResult(likes);
+    }
+
+    @Override
+    public ResponseResult deleteOwnComment(Long id) {
+        if (id == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.INPUT_ERROR);
+        }
+        Comment comment = getById(id);
+        if (comment == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.INPUT_ERROR.getCode(), "评论不存在");
+        }
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == null || !currentUserId.equals(comment.getCreateBy())) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.NO_OPERATOR_AUTH.getCode(), "只能删除自己的评论");
+        }
+        removeById(id);
+        return ResponseResult.okResult();
     }
 
     @Override
