@@ -8,12 +8,15 @@ import com.yuuu.domain.entity.User;
 import com.yuuu.service.CommentService;
 import com.yuuu.constants.SystemConstants;
 import com.yuuu.domain.ResponseResult;
+import com.yuuu.domain.entity.Article;
 import com.yuuu.domain.entity.Comment;
+import com.yuuu.domain.vo.CommentAdminVo;
 import com.yuuu.domain.vo.CommentVo;
 import com.yuuu.domain.vo.PageVo;
 import com.yuuu.enums.AppHttpCodeEnum;
 import com.yuuu.exception.SystemException;
 import com.yuuu.mapper.CommentMapper;
+import com.yuuu.service.ArticleService;
 import com.yuuu.service.SensitiveService;
 import com.yuuu.service.UserService;
 import com.yuuu.utils.BeanCopyUtils;
@@ -42,6 +45,9 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Autowired
     private SensitiveService sensitiveService;
 
+    @Autowired
+    private ArticleService articleService;
+
     @Override
     public ResponseResult getCommentList(String commentType, Long articleId, Integer pageNum, Integer pageSize) {
         //查询对应文章的根评论
@@ -52,6 +58,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         queryWrapper.eq(Comment::getRootId,SystemConstants.COMMENT_ROOT_ID);
         //评论类型
         queryWrapper.eq(Comment::getType,commentType);
+        //只展示审核通过的评论（待审核/已屏蔽仅后台可见）
+        queryWrapper.eq(Comment::getStatus, Comment.STATUS_PASS);
         //分页查询
         Page<Comment> page = new Page(pageNum,pageSize);
         page(page,queryWrapper);
@@ -88,6 +96,71 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         return ResponseResult.okResult(likes);
     }
 
+    @Override
+    public ResponseResult adminList(Integer pageNum, Integer pageSize, String status, String type, String keyword) {
+        LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(status)) {
+            wrapper.eq(Comment::getStatus, status);
+        }
+        if (StringUtils.hasText(type)) {
+            wrapper.eq(Comment::getType, type);
+        }
+        if (StringUtils.hasText(keyword)) {
+            wrapper.like(Comment::getContent, keyword.trim());
+        }
+        wrapper.orderByDesc(Comment::getCreateTime);
+        Page<Comment> page = new Page<>(
+                (pageNum == null || pageNum < 1) ? 1 : pageNum,
+                (pageSize == null || pageSize < 1) ? 10 : pageSize);
+        page(page, wrapper);
+
+        List<CommentAdminVo> vos = page.getRecords().stream().map(comment -> {
+            CommentAdminVo vo = BeanCopyUtils.copyBean(comment, CommentAdminVo.class);
+            if (comment.getArticleId() != null) {
+                Article article = articleService.getById(comment.getArticleId());
+                if (article != null) {
+                    vo.setArticleTitle(article.getTitle());
+                }
+            }
+            if (comment.getCreateBy() != null) {
+                User user = userService.getById(comment.getCreateBy());
+                if (user != null) {
+                    vo.setUserName(user.getUserName());
+                }
+            }
+            return vo;
+        }).collect(Collectors.toList());
+
+        return ResponseResult.okResult(new PageVo(vos, page.getTotal()));
+    }
+
+    @Override
+    public ResponseResult audit(List<Long> ids, String status) {
+        if (ids == null || ids.isEmpty()) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.INPUT_ERROR);
+        }
+        if (!Comment.STATUS_PENDING.equals(status)
+                && !Comment.STATUS_PASS.equals(status)
+                && !Comment.STATUS_BLOCK.equals(status)) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.INPUT_ERROR);
+        }
+        List<Comment> comments = listByIds(ids);
+        for (Comment comment : comments) {
+            comment.setStatus(status);
+        }
+        updateBatchById(comments);
+        return ResponseResult.okResult();
+    }
+
+    @Override
+    public ResponseResult deleteByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.INPUT_ERROR);
+        }
+        removeByIds(ids);
+        return ResponseResult.okResult();
+    }
+
 
     /**
      * @description:根据根评论的id查询子评论集合，并返回
@@ -99,6 +172,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private List<CommentVo> getChildren(Long id) {
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Comment::getRootId, id);
+        queryWrapper.eq(Comment::getStatus, Comment.STATUS_PASS);
         queryWrapper.orderByDesc(Comment::getCreateTime);
         List<Comment> list = list(queryWrapper);
         List<CommentVo> commentVos = toCommentList(list);

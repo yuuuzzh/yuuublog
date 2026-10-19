@@ -659,6 +659,16 @@ CREATE TABLE `yuuu_subscribe`  (
   UNIQUE INDEX `uk_subscribe_email`(`email`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '邮件订阅' ROW_FORMAT = Dynamic;
 
+-- 评论审核状态字段：0待审核 1通过 2屏蔽（已有评论默认通过）
+ALTER TABLE `yuuu_comment` ADD COLUMN `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '1' COMMENT '状态（0待审核 1通过 2屏蔽）' AFTER `type`;
+UPDATE `yuuu_comment` SET `status` = '1' WHERE `status` IS NULL;
+
+-- 后台菜单：评论管理（父级为「内容管理」2017）
+INSERT INTO `sys_menu` VALUES (2076, '评论管理', 2017, 7, 'comment', 'content/comment/index', 1, 'C', '0', '0', 'content:comment:list', 'comment', 1, NOW(), 1, NOW(), '', '0');
+INSERT INTO `sys_menu` VALUES (2077, '评论查询', 2076, 1, '', NULL, 1, 'F', '0', '0', 'content:comment:query', '#', 1, NOW(), 1, NOW(), '', '0');
+INSERT INTO `sys_menu` VALUES (2078, '评论审核', 2076, 2, '', NULL, 1, 'F', '0', '0', 'content:comment:audit', '#', 1, NOW(), 1, NOW(), '', '0');
+INSERT INTO `sys_menu` VALUES (2079, '评论删除', 2076, 3, '', NULL, 1, 'F', '0', '0', 'content:comment:remove', '#', 1, NOW(), 1, NOW(), '', '0');
+
 -- 后台菜单：邮件订阅（父级为「内容管理」2017）
 INSERT INTO `sys_menu` VALUES (2073, '邮件订阅', 2017, 6, 'subscribe', 'content/subscribe/index', 1, 'C', '0', '0', 'content:subscribe:list', 'message', 1, NOW(), 1, NOW(), '', '0');
 INSERT INTO `sys_menu` VALUES (2074, '邮件订阅查询', 2073, 1, '', NULL, 1, 'F', '0', '0', 'content:subscribe:query', '#', 1, NOW(), 1, NOW(), '', '0');

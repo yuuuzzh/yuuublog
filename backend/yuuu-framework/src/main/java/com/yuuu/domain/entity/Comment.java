@@ -28,6 +28,11 @@ public class Comment  {
 
     //评论类型（0代表文章评论，1代表友链评论）
     private String type;
+    /** 审核状态（0待审核 1通过 2屏蔽） */
+    public static final String STATUS_PENDING = "0";
+    public static final String STATUS_PASS = "1";
+    public static final String STATUS_BLOCK = "2";
+    private String status;
     //文章id
     private Long articleId;
     //根评论id

@@ -168,6 +168,16 @@ export const constantRoutes = [
     }]
   },
   {
+    path: '/content/comment',
+    component: Layout,
+    children: [{
+      path: '/',
+      name: 'comment',
+      component: () => import('@/views/content/comment/index'),
+      hidden: true
+    }]
+  },
+  {
     path: '/log/login',
     component: Layout,
     children: [{
