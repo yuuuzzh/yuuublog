@@ -7,9 +7,17 @@
                 </el-switch>
             </el-form-item>
         </el-form>
-        <div ref="chart" style="position:absolute ;left: 20px; width: 800px; height: 400px;"></div>
-        <div ref="chartBar" style="position:absolute ;left: 20px; bottom: 0px; width: 800px; height: 400px;"></div>
-        <div ref="chartMap" style="position:absolute ;right: 20px; bottom: 30px; width: 900px; height: 700px;"></div>
+        <div class="chart-grid">
+            <div class="chart-card c-line">
+                <div ref="chart" class="chart"></div>
+            </div>
+            <div class="chart-card c-bar">
+                <div ref="chartBar" class="chart"></div>
+            </div>
+            <div class="chart-card c-map">
+                <div ref="chartMap" class="chart"></div>
+            </div>
+        </div>
 
     </div>
 </template>
@@ -131,7 +139,7 @@ export default {
                 visualMap: {
                     min: 0,
                     max: Math.max(...Object.values(areaData)),
-                    left: 850,
+                    right: 20,
                     bottom: 40,
                     showLabel: true,
                     text: ['多', '少'],
@@ -216,13 +224,81 @@ export default {
     },
     mounted() {
         this.queryLoginLog()
+        // 容器尺寸变化时重绘，防止栅格变化后图表错位
+        this._resizeHandler = () => {
+            ['chart', 'chartBar', 'chartMap'].forEach(refName => {
+                const inst = echarts.getInstanceByDom(this.$refs[refName])
+                if (inst) inst.resize()
+            })
+        }
+        window.addEventListener('resize', this._resizeHandler)
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this._resizeHandler)
     },
 }
 </script>
 <style>
 .my-container {
     background-color: #333333;
-    height: 94.5vh;
+    min-height: 94.5vh;
     width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+/* 三张图改为栅格布局：折线图与国外柱状图并排，中国地图独占一整行，不再绝对定位互相覆盖 */
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "line bar"
+        "map map";
+    gap: 15px;
+}
+
+.chart-card {
+    background: rgba(0, 0, 0, .2);
+    border-radius: 8px;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.c-line {
+    grid-area: line;
+}
+
+.c-bar {
+    grid-area: bar;
+}
+
+.c-map {
+    grid-area: map;
+}
+
+.chart {
+    width: 100%;
+}
+
+.c-line .chart {
+    height: 380px;
+}
+
+.c-bar .chart {
+    height: 380px;
+}
+
+.c-map .chart {
+    height: 620px;
+}
+
+@media screen and (max-width: 1200px) {
+    .chart-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "line"
+            "bar"
+            "map";
+    }
 }
 </style>

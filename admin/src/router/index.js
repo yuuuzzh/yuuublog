@@ -37,6 +37,16 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/about',
+    component: Layout,
+    children: [{
+      path: '/',
+      name: 'AboutSystem',
+      component: () => import('@/views/about/index'),
+      hidden: true
+    }]
+  },
+  {
     path: '/',
     component: Layout,
     redirect: '/dashboard',

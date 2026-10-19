@@ -40,45 +40,8 @@
         <div class="chart-box">
           <div ref="osChart" class="chart"></div>
         </div>
-      </div>
-    </div>
-
-    <div class="dashboard-container" id="#login-img">
-      <div class="dashboard-text" style="font-weight: bolder">
-        YuuuBlog管理系统
-      </div>
-      <div class="content">
-        <div>
-          纳尼？你怎么找到这里来的？！？
-        </div>
-        <div>
-          既然被你发现了，那就尽情探讨吧！有什么问题尽管发送到我的邮箱：864326354@qq.com
-        </div>
-        <br>
-        项目地址：<a href="https://gitee.com/yuuu-zehua">https://gitee.com/yuuu-zehua</a><br>
-        前台地址：<a href="https://www.yuuu.online">www.yuuu.online</a>
-        <br>
-        <br>
-        <div>
-          项目简介：
-          项目采用前后端分离的模式，前端使用Vue框架，后端使用SpringBoot框架。<br><br>
-          前台主要有：
-          <ul>
-            <li>用户功能：用户注册；用户登录，支持Github第三方登录；修改密码</li>
-            <li>文章功能：查看文章；点赞文章；评论文章；下载文章</li>
-            <li>友链功能：申请友链；查看友链；删除友链</li>
-            <li>YuuuChat：聊天机器人</li>
-            <li>其他功能：登录信息展示；网络打赏</li>
-            <li>注：部分功能需科学上网</li>
-          </ul>
-          后台主要有：
-          <ul>
-            <li>用户管理：用户新增；用户修改；用户删除；角色分配</li>
-            <li>文章管理：文章新增；文章修改；文章删除；支持MarkDown格式的文本样式</li>
-            <li>角色管理：角色新增；角色修改；角色授权等</li>
-            <li>菜单管理：新增菜单；修改菜单；删除菜单等</li>
-            <li>其他功能：其他功能的CRUD</li>
-          </ul>
+        <div class="chart-box chart-box-wide">
+          <div ref="dailyChart" class="chart chart-tall"></div>
         </div>
       </div>
     </div>
@@ -98,6 +61,7 @@ export default {
       categoryStats: [],
       topArticles: [],
       visit: {},
+      daily: [],
       charts: []
     }
   },
@@ -122,6 +86,7 @@ export default {
         self.categoryStats = (res && res.categoryStats) || []
         self.topArticles = (res && res.topArticles) || []
         self.visit = (res && res.visit) || {}
+        self.daily = (res && res.daily) || []
         self.$nextTick(self.renderCharts)
       }).catch(function () {
         // 统计失败不影响首页其它内容展示
@@ -132,6 +97,56 @@ export default {
       this.renderTop()
       this.renderTrend()
       this.renderOs()
+      this.renderDaily()
+    },
+    // GitHub 提交记录风格的发布热力图（近一年按天统计文章发布数）
+    renderDaily() {
+      if (!this.$refs.dailyChart || !this.daily.length) return
+      const chart = echarts.init(this.$refs.dailyChart)
+      const end = new Date()
+      const start = new Date()
+      start.setDate(start.getDate() - 364)
+      const fmt = function (d) {
+        const pad = function (n) { return (n < 10 ? '0' : '') + n }
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+      }
+      let max = 0
+      this.daily.forEach(function (i) { if (i.count > max) max = i.count })
+      chart.setOption({
+        title: { text: '文章发布热力图（近一年）', textStyle: { fontSize: 14 } },
+        tooltip: {
+          formatter: function (p) {
+            return p.value[0] + '：发布 ' + (p.value[1] || 0) + ' 篇'
+          }
+        },
+        visualMap: {
+          min: 0,
+          max: Math.max(max, 1),
+          calculable: false,
+          orient: 'horizontal',
+          left: 'center',
+          bottom: 0,
+          inRange: { color: ['#ebedf0', '#9be9a8', '#40c463', '#216e39'] }
+        },
+        calendar: {
+          top: 50,
+          left: 60,
+          right: 16,
+          cellSize: ['auto', 15],
+          range: [fmt(start), fmt(end)],
+          itemStyle: { color: '#ebedf0', borderColor: '#fff' },
+          splitLine: { show: false },
+          yearLabel: { show: false },
+          monthLabel: { nameMap: 'cn' },
+          dayLabel: { nameMap: ['日', '一', '二', '三', '四', '五', '六'] }
+        },
+        series: [{
+          type: 'heatmap',
+          coordinateSystem: 'calendar',
+          data: this.daily.map(function (i) { return [i.day, i.count] })
+        }]
+      })
+      this.charts.push(chart)
     },
     renderTrend() {
       if (!this.$refs.trendChart || !this.visit.trend || !this.visit.trend.length) return
@@ -294,6 +309,15 @@ export default {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 12px;
+}
+
+.chart-box-wide {
+  flex-basis: 100%;
+  min-width: 100%;
+}
+
+.chart-tall {
+  height: 200px;
 }
 
 .chart-box {
