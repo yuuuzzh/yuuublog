@@ -121,7 +121,8 @@ export default {
       categoryList: [],
       tagList: [],
       aId: -1,
-      fileList: []
+      fileList: [],
+      draftTimer: null
     }
   },
   watch: {
@@ -137,9 +138,65 @@ export default {
     this.getCategoryAndTag()
     if (this.aId) {
       this.getArticle()
+    } else {
+      this.restoreDraft()
+    }
+  },
+  mounted() {
+    // 每 30 秒自动把当前内容存为本地草稿，避免误关页面丢失
+    const self = this
+    this.draftTimer = setInterval(function () {
+      self.saveDraft()
+    }, 30000)
+  },
+  beforeDestroy() {
+    if (this.draftTimer) {
+      clearInterval(this.draftTimer)
+      this.draftTimer = null
     }
   },
   methods: {
+    // 本地草稿：静默保存，仅内容非空时才存
+    saveDraft() {
+      if (!this.form.title && !this.form.content) {
+        return
+      }
+      localStorage.setItem('blogArticleDraft', JSON.stringify({
+        form: this.form,
+        time: Date.now()
+      }))
+    },
+    clearDraft() {
+      localStorage.removeItem('blogArticleDraft')
+    },
+    restoreDraft() {
+      const self = this
+      const raw = localStorage.getItem('blogArticleDraft')
+      if (!raw) {
+        return
+      }
+      let draft = null
+      try {
+        draft = JSON.parse(raw)
+      } catch (e) {
+        localStorage.removeItem('blogArticleDraft')
+        return
+      }
+      if (!draft || !draft.form || (!draft.form.title && !draft.form.content)) {
+        localStorage.removeItem('blogArticleDraft')
+        return
+      }
+      const timeText = draft.time ? new Date(draft.time).toLocaleString() : '未知时间'
+      this.$confirm('发现 ' + timeText + ' 未提交的草稿，是否恢复？', '草稿恢复', {
+        confirmButtonText: '恢复',
+        cancelButtonText: '丢弃',
+        type: 'warning'
+      }).then(function () {
+        self.form = draft.form
+      }).catch(function () {
+        self.clearDraft()
+      })
+    },
     getArticle() {
       getArticle(this.aId).then(response => {
         this.form = response
@@ -149,6 +206,7 @@ export default {
     handleSave() {
       this.form.status = '1'
       addArticle(this.form).then(response => {
+        this.clearDraft()
         this.$modal.msgSuccess('保存草稿成功')
       })
     },
@@ -156,12 +214,14 @@ export default {
       if (!this.aId) {
         this.form.status = '0'
         addArticle(this.form).then(response => {
+          this.clearDraft()
           this.$modal.msgSuccess('博客发布成功')
           this.$router.push({ path: '/content/article' })
         })
       } else {
         // 更新博客信息
         updateArticle(this.form).then(response => {
+          this.clearDraft()
           this.$modal.msgSuccess('博客更新成功')
           this.$router.push({ path: '/content/article' })
         })

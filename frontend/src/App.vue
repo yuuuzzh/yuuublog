@@ -5,6 +5,7 @@
         <CommandPalette></CommandPalette>
         <CursorFx></CursorFx>
         <MobileTabBar></MobileTabBar>
+        <ReadSettings></ReadSettings>
         <transition name="page" mode="out-in">
             <keep-alive :include="['Aboutme', 'Message', 'FriendsLink', 'Reward']">
                 <router-view></router-view>
@@ -32,6 +33,7 @@ import ScrollProgress from './components/ScrollProgress.vue'
 import CommandPalette from './components/CommandPalette.vue'
 import CursorFx from './components/CursorFx.vue'
 import MobileTabBar from './components/MobileTabBar.vue'
+import ReadSettings from './components/ReadSettings.vue'
 import { getStoredTheme, setStoredTheme, applyTheme } from './utils/theme.js'
 export default {
     name: 'App',
@@ -163,7 +165,8 @@ export default {
         ScrollProgress,
         CommandPalette,
         CursorFx,
-        MobileTabBar
+        MobileTabBar,
+        ReadSettings
     },
     mounted() {
         window.addEventListener('scroll', this.handleScroll);

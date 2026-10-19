@@ -178,6 +178,16 @@ export const constantRoutes = [
     }]
   },
   {
+    path: '/content/upload',
+    component: Layout,
+    children: [{
+      path: '/',
+      name: 'uploadManage',
+      component: () => import('@/views/content/upload/index'),
+      hidden: true
+    }]
+  },
+  {
     path: '/log/login',
     component: Layout,
     children: [{

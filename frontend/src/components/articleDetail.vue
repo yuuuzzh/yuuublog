@@ -346,7 +346,8 @@ export default {
 }
 
 .detailBox .article-content {
-  font-size: 15px;
+  /* 移动端「阅读设置」里的字号调节通过 --font-scale 生效（~"" 转义，避免 Less 自行计算 calc） */
+  font-size: ~"calc(15px * var(--font-scale, 1))";
   white-space: normal;
   word-wrap: break-word;
   word-break: break-all;

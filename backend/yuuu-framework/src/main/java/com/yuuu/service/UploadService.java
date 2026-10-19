@@ -13,4 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface UploadService {
     ResponseResult uploadImg(MultipartFile img);
+
+    /**
+     * 已上传文件列表（分页游标 marker）
+     */
+    ResponseResult listUploaded(String marker, Integer limit);
+
+    /**
+     * 删除已上传文件（按 key）
+     */
+    ResponseResult deleteUploaded(String key);
 }
