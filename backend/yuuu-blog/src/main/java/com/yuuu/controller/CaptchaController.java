@@ -39,6 +39,30 @@ public class CaptchaController {
     public CaptchaController(DefaultKaptcha producer) {
         this.producer = producer;
     }
+    /**
+     * 算术验证码：返回题目与令牌（答案存 Redis，60 秒有效）。
+     * 前端把题目渲染成胶囊样式，比扭曲图片更美观且与整体风格统一。
+     */
+    @GetMapping("/math")
+    public ResponseResult mathCaptcha() {
+        java.util.Random random = new java.util.Random();
+        int a = 10 + random.nextInt(60);
+        int b = 5 + random.nextInt(40);
+        boolean plus = random.nextBoolean();
+        // 减法保证非负
+        int left = plus ? a : Math.max(a, b);
+        int right = plus ? b : Math.min(a, b);
+        int result = plus ? left + right : left - right;
+
+        String captchaKey = UUID.randomUUID().toString().replace("-", "");
+        redisCache.setCacheObject(SystemConstants.CAPTCHA_KEY + captchaKey, String.valueOf(result), 60, TimeUnit.SECONDS);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("captchaKey", captchaKey);
+        data.put("question", left + (plus ? " + " : " − ") + right + " = ?");
+        return ResponseResult.okResult(data);
+    }
+
     @GetMapping()
     public ResponseResult captcha(HttpServletRequest request, HttpServletResponse response) throws Exception {
         // 生成验证码

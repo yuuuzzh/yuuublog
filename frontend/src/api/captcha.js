@@ -24,3 +24,24 @@ export function getCaptchaImg() {
         });
     });
 }
+
+// 算术验证码：返回 { captchaKey, question }
+export function getMathCaptcha() {
+    return new Promise((resolve, reject) => {
+        request({
+            url: '/captcha/math',
+            headers: {
+                isToken: false
+            },
+            method: 'get'
+        }).then(response => {
+            resolve({
+                captchaKey: response.captchaKey,
+                question: response.question
+            });
+        }).catch(error => {
+            console.error(error);
+            reject(error);
+        });
+    });
+}

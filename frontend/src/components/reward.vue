@@ -3,7 +3,7 @@
   <div class="tRewardBox tcommonBox">
     <header>
       <h1>
-        <a href="#/DetailShare" target="_blank"> 赞赏 </a>
+        <a href="/Share" target="_blank"> 赞赏 </a>
       </h1>
     </header>
     <section>

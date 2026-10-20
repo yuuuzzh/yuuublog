@@ -32,7 +32,7 @@
 									<i class="fa fa-fw fa-user-circle userImg"></i>
 									<ul class="haslogin-info">
 										<li>
-											<a href="#/UserInfo">个人中心</a>
+											<a href="/UserInfo">个人中心</a>
 										</li>
 										<li>
 											<a href="https://www.yuuu.online:8094">进入后台</a>

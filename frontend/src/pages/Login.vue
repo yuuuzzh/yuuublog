@@ -1,177 +1,215 @@
-<!-- 登录注册 -->
+<!-- 登录 / 注册 / 修改密码 / 第三方绑定 -->
 <template>
-    <div>
-        <div class="carousel-container">
-            <el-carousel height="100vh" indicator-position="none">
+    <div class="loginPage">
+        <!-- 背景图占满全屏 -->
+        <div class="bgLayer">
+            <el-carousel height="100%" indicator-position="none" :interval="5000" arrow="never">
                 <el-carousel-item>
-                    <img style="object-fit: cover; width: 100%; height: 100%; "
-                        src="../../static/img/login-bac0.png" />
+                    <img src="../../static/img/login-bac0.png" />
                 </el-carousel-item>
                 <el-carousel-item>
-                    <img style="object-fit: cover; width: 100%; height: 100%;"
-                        src="../../static/img/login-bac1.png" />
+                    <img src="../../static/img/login-bac1.png" />
                 </el-carousel-item>
                 <el-carousel-item>
-                    <img style="object-fit: cover; width: 100%; height: 100%;"
-                        src="../../static/img/login-bac2.png" />
+                    <img src="../../static/img/login-bac2.png" />
                 </el-carousel-item>
             </el-carousel>
         </div>
 
-        <div class="container">
-            <h1 class="loginTitle wenzi">
-                生命的意义在于不顺从
-            </h1>
-            <!-- 修改密码 -->
-            <div v-if="login == 2" class="changePasswordBox">
-                <div class="lr-title">
-                    <h1>修改密码</h1>
-                    <p>
-                        已有账号<a href="#/Login?login=1" class="tcolors">登录</a>
-                    </p>
-                </div>
-                <el-alert v-show="changePasswordErr" :title="changePasswordTitle" type="error" show-icon :closable="false">
-                </el-alert>
-                <el-input style="margin-bottom: 30px;" type="text" placeholder="邮箱" v-model="emailPassword">
-                </el-input>
-                <el-input style="margin-bottom: 30px;" type="password" placeholder="密码" v-model="newPassword">
-                </el-input>
-                <el-input style="margin-bottom: 30px;" type="password" placeholder="确认密码" v-model="confirmNewPassword">
-                </el-input>
-                <!-- 验证码 -->
-                <el-row>
-                    <el-col :span="14">
-                        <el-input type="text" placeholder="验证码" v-model="emailCaptchaUpdate">
+        <!-- 表单卡浮在背景之上 -->
+        <div class="loginWrap">
+            <div class="loginCard">
+                <a class="cardTop" href="/">← 一蓑烟雨任平生</a>
+
+                <!-- 登录 -->
+                <div v-if="login == 1">
+                    <h1 class="formTitle">欢迎回来</h1>
+                    <p class="formSub">生命的意义在于不顺从</p>
+
+                    <div v-show="loginErr" class="formError">{{ loginTitle }}</div>
+
+                    <div class="field">
+                        <label>用户名</label>
+                        <el-input class="lgInput" type="text" placeholder="请输入用户名" v-model="username">
                         </el-input>
-                    </el-col>
-                    <el-col :span="10">
-                        <el-button style="width:100%;text-align: left;margin-bottom: 30px" type="primary" plain
-                            icon="el-icon-message" @click="sendCodeForUpdatePassword" :disabled="isButtonDisabled2">
-                            发送验证码
-                        </el-button>
-                    </el-col>
-                </el-row>
-
-                <el-alert v-show="uemailErr" title="邮箱不能为空" type="error" show-icon :closable="false">
-                </el-alert>
-                <div class="lr-btn tcolors-bg" @click="changePassword">确定</div>
-            </div>
-
-
-            <!-- 绑定第三方登录信息 -->
-            <div v-if="login == 9" class="changePasswordBox">
-                <div class="lr-title">
-                    <h1>请完成绑定</h1>
-                </div>
-                <el-alert v-show="changePasswordErr" :title="changePasswordTitle" type="error" show-icon :closable="false">
-                </el-alert>
-                <el-input style="margin-bottom: 30px;" type="text" placeholder="邮箱" v-model="emailPassword">
-                </el-input>
-                <!-- 验证码 -->
-                <el-row>
-                    <el-col :span="14">
-                        <el-input type="text" placeholder="验证码" v-model="emailCaptchaUpdate">
+                    </div>
+                    <div class="field">
+                        <label>密码</label>
+                        <el-input class="lgInput" :type="pwdVisible ? 'text' : 'password'" placeholder="请输入密码"
+                            v-model="password" @keyup.enter.native="loginEnterFun">
+                            <i slot="suffix" class="fa" :class="pwdVisible ? 'fa-eye' : 'fa-eye-slash'"
+                                @click="pwdVisible = !pwdVisible"></i>
                         </el-input>
-                    </el-col>
-                    <el-col :span="10">
-                        <el-button style="width:100%;text-align: left;margin-bottom: 30px" type="primary" plain
-                            icon="el-icon-message" @click="sendCodeForUpdatePassword" :disabled="isButtonDisabled2">
-                            发送验证码
-                        </el-button>
-                    </el-col>
-                </el-row>
+                    </div>
+                    <div class="field">
+                        <label>验证码</label>
+                        <div class="captchaRow">
+                            <el-input class="lgInput" type="text" placeholder="请输入计算结果" v-model="captcha"
+                                @keyup.enter.native="loginEnterFun"></el-input>
+                            <button class="mathCaptcha" type="button" @click="refreshCaptcha" title="点击刷新">
+                                <span>{{ mathQuestion }}</span>
+                                <i class="fa fa-refresh"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                <el-alert v-show="uemailErr" title="邮箱不能为空" type="error" show-icon :closable="false">
-                </el-alert>
-                <div class="lr-btn tcolors-bg" @click="oauthWithGithub">确定</div>
-            </div>
+                    <div class="formRow">
+                        <el-checkbox v-model="rememberMe">记住我</el-checkbox>
+                        <a href="/Login?login=2" class="linkBtn">忘记密码？</a>
+                    </div>
 
-            <!-- 登录 -->
-            <div v-if="login == 1" class="loginBox">
-                <div class="lr-title">
-                    <h1>登录</h1>
-                    <p>
-                        新用户<a href="#/Login?login=0" class="tcolors">注册</a>
-                    </p>
-                </div>
-                <el-alert v-show="loginErr" :title="loginTitle" type="error" show-icon :closable="false">
-                </el-alert>
-                <el-input type="text" placeholder="用户名" v-model="username">
-                </el-input>
-                <el-input type="password" placeholder="密码" v-model="password">
-                </el-input>
+                    <button class="primaryBtn" @click="gotoHome">登录</button>
 
-                <div class="captchaBox">
-                    <el-input type="text" placeholder="验证码" @keyup.enter.native="loginEnterFun" v-model="captcha"></el-input>
-                    <img class="captchaImg" :src="captchaUrl" @click="refreshCaptcha">
-                </div>
-                <h3><a href="#/Login?login=2">忘记密码？</a></h3>
-                <div class="lr-btn tcolors-bg" @click="gotoHome">登录</div>
+                    <div class="divider"><span>或使用第三方账号</span></div>
+                    <div class="socialBtns">
+                        <a class="socialBtn github"
+                            href="https://yuuuzzh.us.kg/login/oauth/authorize?client_id%3Dc62e602f840881ab59b2%26state%3Dgithub">
+                            <i class="fa fa-fw fa-github"></i>GitHub
+                        </a>
+                        <a class="socialBtn qq" href="javascript:void(0)" @click="showAlert">
+                            <i class="fa fa-fw fa-qq"></i>QQ
+                        </a>
+                        <a class="socialBtn weibo" href="javascript:void(0)" @click="showAlert">
+                            <i class="fa fa-fw fa-weibo"></i>微博
+                        </a>
+                    </div>
 
-                <div class="otherLogin">
-                    <a href="https://yuuuzzh.us.kg/login/oauth/authorize?client_id%3Dc62e602f840881ab59b2%26state%3Dgithub">
-                        <i class="fa fa-fw fa-github" style="background-color: black;"></i>
-                    </a>
-                    <a href="javascript:void(0)" @click="showAlert">
-                        <i class="fa fa-fw fa-qq"></i></a>
-                    <a href="javascript:void(0)" @click="showAlert"><i class="fa fa-fw fa-weibo"></i></a>
+                    <p class="switchLine">还没有账号？<a href="/Login?login=0">立即注册</a></p>
                 </div>
-            </div>
-            <!-- 注册 -->
-            <div v-if="login == 0" class="registerBox">
-                <div class="lr-title">
-                    <h1>注册</h1>
-                    <p>
-                        已有账号<a href="#/Login?login=1" class="tcolors">登录</a>
-                    </p>
-                </div>
-                <el-alert v-show="registerErr" :title="registerTitle" type="error" show-icon :closable="false">
-                </el-alert>
-                <el-input type="text" placeholder="用户名" v-model="nusername">
-                </el-input>
-                <el-alert v-show="nusernameErr" title="用户名错误" type="error" show-icon :closable="false">
-                </el-alert>
-                <el-input type="text" placeholder="昵称" v-model="nnickName">
-                </el-input>
-                <el-input type="email" placeholder="邮箱" v-model="nemail">
-                </el-input>
-                <el-row>
-                    <el-col :span="14">
-                        <el-input type="text" placeholder="验证码" v-model="emailCaptcha">
+
+                <!-- 注册 -->
+                <div v-if="login == 0">
+                    <h1 class="formTitle">创建账号</h1>
+                    <p class="formSub">注册后即可评论、收藏与订阅</p>
+
+                    <div v-show="registerErr" class="formError">{{ registerTitle }}</div>
+
+                    <div class="field">
+                        <label>用户名</label>
+                        <el-input class="lgInput" type="text" placeholder="请输入用户名" v-model="nusername"></el-input>
+                        <div v-show="nusernameErr" class="fieldError">用户名错误</div>
+                    </div>
+                    <div class="field">
+                        <label>昵称</label>
+                        <el-input class="lgInput" type="text" placeholder="请输入昵称" v-model="nnickName"></el-input>
+                    </div>
+                    <div class="field">
+                        <label>邮箱</label>
+                        <el-input class="lgInput" type="email" placeholder="you@example.com" v-model="nemail">
                         </el-input>
-                    </el-col>
-                    <el-col :span="10">
-                        <el-button style="width:100%;text-align: left;" type="info" icon="el-icon-message"
-                            @click="sendVerificationCode" :disabled="isButtonDisabled">
-                            {{ isButtonDisabled ? timeLeft + 's' : '发送验证码' }}
-                        </el-button>
-                    </el-col>
-                </el-row>
+                        <div v-show="nemailErr" class="fieldError">邮箱不能为空</div>
+                    </div>
+                    <div class="field">
+                        <label>邮箱验证码</label>
+                        <div class="captchaRow">
+                            <el-input class="lgInput" type="text" placeholder="请输入验证码" v-model="emailCaptcha">
+                            </el-input>
+                            <el-button class="codeBtn" type="info" icon="el-icon-message" @click="sendVerificationCode"
+                                :disabled="isButtonDisabled">
+                                {{ isButtonDisabled ? timeLeft + 's' : '发送验证码' }}
+                            </el-button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>密码</label>
+                        <el-input class="lgInput" type="password" placeholder="6-12 位英文、数字、下划线"
+                            v-model="npassword"></el-input>
+                        <div v-show="npasswordErr" class="fieldError">密码错误</div>
+                    </div>
+                    <div class="field">
+                        <label>确认密码</label>
+                        <el-input class="lgInput" type="password" placeholder="请再次输入密码" v-model="npassword2"
+                            @keyup.enter.native="registerEnterFun"></el-input>
+                        <div v-show="npassword2Err" class="fieldError">重复密码有误</div>
+                    </div>
 
-                <!-- <button @click="sendVerificationCode">发送验证码</button> -->
-                <el-alert v-show="nemailErr" title="邮箱不能为空" type="error" show-icon :closable="false">
-                </el-alert>
-                <el-input type="password" placeholder="密码:6-12位英文、数字、下划线" v-model="npassword">
-                </el-input>
-                <el-alert v-show="npasswordErr" title="密码错误" type="error" show-icon :closable="false">
-                </el-alert>
-                <el-input type="password" placeholder="确认密码" @keyup.enter.native="registerEnterFun" v-model="npassword2">
-                </el-input>
-                <el-alert v-show="npassword2Err" title="重复密码有误" type="error" show-icon :closable="false">
-                </el-alert>
-                <div class="lr-btn tcolors-bg" @click="newRegister" v-loading.fullscreen.lock="fullscreenLoading"
-                    element-loading-text="提交中">注册</div>
+                    <button class="primaryBtn" @click="newRegister" v-loading.fullscreen.lock="fullscreenLoading"
+                        element-loading-text="提交中">注册</button>
+
+                    <p class="switchLine">已有账号？<a href="/Login?login=1">去登录</a></p>
+                </div>
+
+                <!-- 修改密码 -->
+                <div v-if="login == 2">
+                    <h1 class="formTitle">重置密码</h1>
+                    <p class="formSub">通过邮箱验证码重置</p>
+
+                    <div v-show="changePasswordErr" class="formError">{{ changePasswordTitle }}</div>
+
+                    <div class="field">
+                        <label>邮箱</label>
+                        <el-input class="lgInput" type="text" placeholder="请输入注册邮箱" v-model="emailPassword">
+                        </el-input>
+                        <div v-show="uemailErr" class="fieldError">邮箱不能为空</div>
+                    </div>
+                    <div class="field">
+                        <label>新密码</label>
+                        <el-input class="lgInput" type="password" placeholder="请输入新密码" v-model="newPassword">
+                        </el-input>
+                    </div>
+                    <div class="field">
+                        <label>确认新密码</label>
+                        <el-input class="lgInput" type="password" placeholder="请再次输入新密码"
+                            v-model="confirmNewPassword"></el-input>
+                    </div>
+                    <div class="field">
+                        <label>邮箱验证码</label>
+                        <div class="captchaRow">
+                            <el-input class="lgInput" type="text" placeholder="请输入验证码" v-model="emailCaptchaUpdate">
+                            </el-input>
+                            <el-button class="codeBtn" type="info" icon="el-icon-message"
+                                @click="sendCodeForUpdatePassword" :disabled="isButtonDisabled2">
+                                {{ isButtonDisabled2 ? timeLeft1 + 's' : '发送验证码' }}
+                            </el-button>
+                        </div>
+                    </div>
+
+                    <button class="primaryBtn" @click="changePassword">确定</button>
+
+                    <p class="switchLine">想起来了？<a href="/Login?login=1">去登录</a></p>
+                </div>
+
+                <!-- 第三方账号绑定 -->
+                <div v-if="login == 9">
+                    <h1 class="formTitle">请完成绑定</h1>
+                    <p class="formSub">绑定邮箱后即可完成第三方登录</p>
+
+                    <div v-show="changePasswordErr" class="formError">{{ changePasswordTitle }}</div>
+
+                    <div class="field">
+                        <label>邮箱</label>
+                        <el-input class="lgInput" type="text" placeholder="请输入邮箱" v-model="emailPassword">
+                        </el-input>
+                        <div v-show="uemailErr" class="fieldError">邮箱不能为空</div>
+                    </div>
+                    <div class="field">
+                        <label>邮箱验证码</label>
+                        <div class="captchaRow">
+                            <el-input class="lgInput" type="text" placeholder="请输入验证码" v-model="emailCaptchaUpdate">
+                            </el-input>
+                            <el-button class="codeBtn" type="info" icon="el-icon-message"
+                                @click="sendCodeForUpdatePassword" :disabled="isButtonDisabled2">
+                                {{ isButtonDisabled2 ? timeLeft1 + 's' : '发送验证码' }}
+                            </el-button>
+                        </div>
+                    </div>
+
+                    <button class="primaryBtn" @click="oauthWithGithub">确定</button>
+                </div>
             </div>
         </div>
-
     </div>
 </template>
+
+
+
+
 
 <script>
 import { userLogin, userRegister, sendVerificationCode, sendCodeForUpdatePassword, changePassword } from '../api/user.js'
 import { setToken } from '../utils/auth.js'
 import  encryptPassword  from '../utils/encryptPassword'
-import { getCaptchaImg } from '@/api/captcha.js';
+import { getMathCaptcha } from '@/api/captcha.js';
 import request from "@/utils/request.js"
 export default {
     name: 'Login',
@@ -199,7 +237,9 @@ export default {
             urlstate: 0,//重新注册
             captcha: '',
             captchaKey: '',
-            captchaUrl: '',
+            pwdVisible: false,//密码是否明文显示
+            rememberMe: false,//记住我（记住用户名）
+            mathQuestion: '',
             captchaUrlUpdate: '',
             nnickName: '',
             emailCaptcha: '',
@@ -221,6 +261,12 @@ export default {
     mounted() {
         // 页面加载时刷新验证码
         this.refreshCaptcha();
+        // 记住我：回显上次记住的用户名
+        var remembered = localStorage.getItem('rememberUser');
+        if (remembered) {
+            this.username = remembered;
+            this.rememberMe = true;
+        }
     },
     methods: { //事件处理器
         routeChange: function () {
@@ -362,12 +408,12 @@ export default {
                     });
             }
         },
-        refreshCaptcha() {//这个是登录验证码
-            const promise = getCaptchaImg();
+        refreshCaptcha() {//登录算术验证码
+            const promise = getMathCaptcha();
             promise.then((response) => {
                 // 验证码令牌：提交登录时一起带上，保证只校验本次获取的验证码
                 this.captchaKey = response.captchaKey || '';
-                this.captchaUrl = 'data:image/png;base64,' + response.captchaImageBase64;
+                this.mathQuestion = response.question || '';
             }).catch(error => {
                 console.error(error); // 打印错误信息
                 this.$message.error('获取验证码失败：' + error.message);
@@ -385,6 +431,12 @@ export default {
             userLogin(this.username, encryptPassword.encrypt(this.password), this.captcha, this.captchaKey).then((response) => {
                 // 登录成功记录token和用户信息，登录失败给对应提示
                 setToken(response.token)
+                // 记住我：仅记住用户名，不保存密码
+                if (this.rememberMe) {
+                    localStorage.setItem('rememberUser', this.username);
+                } else {
+                    localStorage.removeItem('rememberUser');
+                }
                 // 存储用户信息
                 localStorage.setItem("userInfo", JSON.stringify(response.userInfo))
                 // 登录成功后跳回登录前的页面；logUrl 是登录页自身或不存在时回首页（避免原地重复跳转不生效）
@@ -465,187 +517,339 @@ export default {
 </script>
 
 <style>
-@font-face {
-    font-family: 'CustomFont';
-    src: url('../assets/font/ShangShouZhiZunShuFaTi/No.39-ShangShouZhiZunShuFaTi-2.ttf');
+/* ================= 背景图占满全屏 + 表单卡浮层 ================= */
+.loginPage {
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
-.wenzi {
-    font-size: 24px;
-    font-family: 'CustomFont';
-}
-
-.container {
-    opacity: 0.80;
-}
-
-.carousel-container {
-    position: absolute;
+/* ---------- 全屏背景 ---------- */
+.bgLayer {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: 0;
 }
 
-/*登录注册标题*/
-.loginTitle {
-    text-align: center;
-    font-size: 26px;
-    padding-top: 50px;
-    margin-bottom: 20px;
+.bgLayer .el-carousel {
+    height: 100%;
 }
 
-.captchaImg1 {
+.bgLayer .el-carousel__container {
+    height: 100% !important;
+}
+
+.bgLayer img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
 }
 
-.loginBox,
-.changePasswordBox,
-.registerBox {
-    background: var(--surface);
-    padding: 40px;
-    max-width: 320px;
-    margin: 0 auto;
-}
-
-.loginBox {
-    padding-bottom: 0;
-}
-
-.lr-title {
+/* ---------- 居中表单卡 ---------- */
+.loginWrap {
     position: relative;
-    height: 32px;
-    line-height: 32px;
-    margin-bottom: 20px;
+    z-index: 5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
 }
 
-.lr-title h1 {
-    font-size: 24px;
-    color: #666;
-    font-weight: bold;
-    /*width:50%;*/
+.loginCard {
+    position: relative;
+    width: 420px;
+    max-width: 92vw;
+    padding: 34px 34px 30px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, .58);
+    -webkit-backdrop-filter: blur(26px) saturate(170%);
+    backdrop-filter: blur(26px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, .55);
+    box-shadow: 0 26px 70px rgba(10, 18, 40, .38);
+    animation: cardIn .55s cubic-bezier(.22, .8, .36, 1);
 }
 
-.lr-title p {
-    font-size: 12px;
-    color: #999;
-    position: absolute;
-    right: 0;
-    top: 0;
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
-.lr-btn {
-    color: #fff;
-    text-align: center;
-    letter-spacing: 5px;
-    padding: 8px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 30px;
-}
-
-.loginBox .el-input,
-.registerBox .el-input {
-    margin-bottom: 20px;
-}
-
-.loginBox .el-alert,
-.registerBox .el-alert {
-    top: -18px;
-    background-color: #888;
-}
-
-.loginBox .el-input input,
-.registerBox .el-input input {
-    border-radius: 4px;
-}
-
-.loginBox h3,
-.registerBox h3 {
-    text-align: right;
-    margin-bottom: 20px;
-}
-
-.loginBox h3 a,
-.registerBox h3 a {
-    font-size: 13px;
-    color: #999;
-}
-
-.loginBox .otherLogin {
-    max-width: 320px;
-    padding: 30px 40px;
-    background: #ddd;
-    text-align: center;
-    margin-left: -40px;
-    margin-right: -40px;
-    /* visibility: hidden; */
-}
-
-.loginBox .otherLogin p {
-    margin-bottom: 20px;
-    font-size: 16px;
-}
-
-.loginBox .otherLogin a i {
+.cardTop {
     display: inline-block;
-    width: 42px;
-    height: 42px;
-    line-height: 42px;
-    font-size: 18px;
-    border-radius: 50%;
-    color: #fff;
-    margin: 0 10px;
-}
-
-.loginBox .otherLogin a i.fa-wechat {
-    background: #7bc549;
-}
-
-.loginBox .otherLogin a i.fa-qq {
-    background: #56b6e7;
-}
-
-.loginBox .otherLogin a i.fa-weibo {
-    background: #ff763b;
-}
-
-/*登录成功*/
-.registerSuc {
-    padding: 40px;
-    margin: 0 auto;
-}
-
-.registerSuc .sucIcon {
-    text-align: center;
-    margin-bottom: 30px;
-    padding-left: 60px;
-}
-
-.registerSuc .sucContent {
-    line-height: 1.5;
-    font-size: 15px;
-    text-align: center;
-}
-
-.registerSuc .sucContent p {
-    margin-top: 10px;
+    margin-bottom: 18px;
     font-size: 13px;
-    color: #999;
+    font-weight: 600;
+    color: #4F8CFF;
+    text-decoration: none;
 }
 
-.registerSuc .sucContent .lastbtn {
-    display: inline-block;
+.cardTop:hover {
+    text-decoration: underline;
+}
+
+.formTitle {
+    font-size: 25px;
+    font-weight: 700;
+    color: #1d2433;
+    margin: 0 0 6px;
+}
+
+.formSub {
+    font-size: 13px;
+    color: #64708a;
+    margin: 0 0 22px;
+}
+
+/* 字段 */
+.field {
+    margin-bottom: 15px;
+}
+
+.field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64708a;
+    margin-bottom: 7px;
+}
+
+.lgInput input {
+    height: 44px;
     font-size: 14px;
-    padding: 3px 10px;
-    border-radius: 5px;
-    color: #fff;
-    cursor: pointer;
+    border-radius: 10px;
+    border: 1px solid #e6e9f0;
+    background: rgba(91, 143, 249, .04);
+    color: #1d2433;
+    transition: border-color .25s ease, box-shadow .25s ease;
 }
 
-.registerSuc .sucContent .el-icon-close {
-    fong-size: 13px;
+.lgInput input:focus {
+    border-color: #4F8CFF;
+    box-shadow: 0 0 0 3px rgba(79, 140, 255, .14);
+}
+
+.lgInput .el-input__suffix i {
+    cursor: pointer;
+    line-height: 44px;
+    color: #64708a;
+    padding-right: 4px;
+}
+
+.lgInput .el-input__suffix i:hover {
+    color: #4F8CFF;
+}
+
+.captchaRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.captchaRow .el-input {
+    flex: 1;
+}
+
+.mathCaptcha {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    min-width: 128px;
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #3d4759;
+    background: linear-gradient(120deg, rgba(79, 140, 255, .12), rgba(123, 108, 255, .12));
+    border: 1px solid rgba(79, 140, 255, .35);
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+
+.mathCaptcha:hover {
+    transform: translateY(-1px);
+    border-color: #4F8CFF;
+    box-shadow: 0 6px 16px rgba(79, 140, 255, .22);
+}
+
+.mathCaptcha .fa-refresh {
+    font-size: 12px;
+    color: #4F8CFF;
+    transition: transform .45s ease;
+}
+
+.mathCaptcha:hover .fa-refresh {
+    transform: rotate(180deg);
+}
+
+.codeBtn {
+    height: 44px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+/* 错误提示 */
+.formError {
+    margin-bottom: 15px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #d93026;
+    background: rgba(217, 48, 38, .08);
+    border: 1px solid rgba(217, 48, 38, .28);
+    border-radius: 10px;
+}
+
+.fieldError {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #d93026;
+}
+
+.formRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 4px 0 16px;
+}
+
+.linkBtn {
+    font-size: 13px;
+    color: #4F8CFF;
+    text-decoration: none;
+}
+
+.linkBtn:hover {
+    text-decoration: underline;
+}
+
+.primaryBtn {
+    width: 100%;
+    height: 46px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 1px;
+    cursor: pointer;
+    background: linear-gradient(120deg, #4F8CFF, #7B6CFF);
+    box-shadow: 0 8px 22px rgba(79, 140, 255, .28);
+    transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+
+.primaryBtn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+    box-shadow: 0 12px 28px rgba(79, 140, 255, .36);
+}
+
+.primaryBtn:active {
+    transform: translateY(0);
+}
+
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 20px 0 14px;
+    height: 1px;
+    background: #e6e9f0;
+}
+
+.divider span {
+    position: relative;
+    top: -11px;
+    padding: 0 12px;
+    font-size: 12px;
+    color: #64708a;
+    background: transparent;
+}
+
+.socialBtns {
+    display: flex;
+    gap: 10px;
+}
+
+.socialBtn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 42px;
+    font-size: 13px;
+    color: #1d2433;
+    text-decoration: none;
+    border: 1px solid #e6e9f0;
+    border-radius: 10px;
+    background: rgba(91, 143, 249, .04);
+    transition: transform .25s ease, border-color .25s ease, color .25s ease;
+}
+
+.socialBtn:hover {
+    transform: translateY(-2px);
+    border-color: #4F8CFF;
+    color: #4F8CFF;
+}
+
+.socialBtn.github:hover {
+    color: #24292e;
+    border-color: #24292e;
+}
+
+.socialBtn.qq:hover {
+    color: #12b7f5;
+    border-color: #12b7f5;
+}
+
+.socialBtn.weibo:hover {
+    color: #e6162d;
+    border-color: #e6162d;
+}
+
+.switchLine {
+    margin: 20px 0 0;
+    font-size: 13px;
+    color: #64708a;
+    text-align: center;
+}
+
+.switchLine a {
+    color: #4F8CFF;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.switchLine a:hover {
+    text-decoration: underline;
+}
+
+/* ---------- 移动端 ---------- */
+@media screen and (max-width: 600px) {
+    .loginWrap {
+        padding: 24px 14px;
+        align-items: flex-start;
+    }
+
+    .loginCard {
+        padding: 26px 22px 24px;
+        border-radius: 16px;
+    }
+
+    .formTitle {
+        font-size: 22px;
+    }
 }
 </style>
