@@ -114,11 +114,29 @@ public class DashboardController {
             monthly.add(item);
         }
 
+        // 近一年每日发布量（发布热力图）
+        SimpleDateFormat dayFmt = new SimpleDateFormat("yyyy-MM-dd");
+        Map<String, Long> dayMap = new TreeMap<>();
+        for (Article article : articles) {
+            if (article.getCreateTime() != null) {
+                String day = dayFmt.format(article.getCreateTime());
+                dayMap.put(day, dayMap.getOrDefault(day, 0L) + 1);
+            }
+        }
+        List<Map<String, Object>> daily = new ArrayList<>();
+        for (Map.Entry<String, Long> entry : dayMap.entrySet()) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("day", entry.getKey());
+            item.put("count", entry.getValue());
+            daily.add(item);
+        }
+
         Map<String, Object> data = new HashMap<>();
         data.put("overview", overview);
         data.put("categoryStats", categoryStats);
         data.put("topArticles", topArticles);
         data.put("monthly", monthly);
+        data.put("daily", daily);
         data.put("visit", visitStats());
         return ResponseResult.okResult(data);
     }
