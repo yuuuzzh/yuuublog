@@ -53,6 +53,11 @@ import { mapGetters } from 'vuex'
 import { getDashboardStats } from '@/api/dashboard'
 import echarts from 'echarts'
 
+// 统一图表配色（柔和蓝紫系，参考主流后台风格）
+const CHART_COLORS = ['#5B8FF9', '#61DDAA', '#F6BD16', '#7262FD', '#78D3F8', '#9661BC', '#F6903D', '#008685', '#FF9D4D', '#5D7092']
+// 卡片内标题统一样式
+const TITLE_STYLE = { fontSize: 14, color: '#3d4759', fontWeight: 600 }
+
 export default {
   name: 'Dashboard',
   data() {
@@ -113,7 +118,7 @@ export default {
       let max = 0
       this.daily.forEach(function (i) { if (i.count > max) max = i.count })
       chart.setOption({
-        title: { text: '文章发布热力图（近一年）', textStyle: { fontSize: 14 } },
+        title: { text: '文章发布热力图（近一年）', textStyle: TITLE_STYLE },
         tooltip: {
           formatter: function (p) {
             return p.value[0] + '：发布 ' + (p.value[1] || 0) + ' 篇'
@@ -126,7 +131,10 @@ export default {
           orient: 'horizontal',
           left: 'center',
           bottom: 0,
-          inRange: { color: ['#ebedf0', '#9be9a8', '#40c463', '#216e39'] }
+          itemWidth: 12,
+          itemHeight: 12,
+          textStyle: { fontSize: 11, color: '#64708a' },
+          inRange: { color: ['#EDF1F7', '#B8CCF5', '#5B8FF9', '#2E5FD9'] }
         },
         calendar: {
           top: 50,
@@ -134,11 +142,11 @@ export default {
           right: 16,
           cellSize: ['auto', 15],
           range: [fmt(start), fmt(end)],
-          itemStyle: { color: '#ebedf0', borderColor: '#fff' },
+          itemStyle: { color: '#f0f2f5', borderColor: '#fff' },
           splitLine: { show: false },
           yearLabel: { show: false },
-          monthLabel: { nameMap: 'cn' },
-          dayLabel: { nameMap: ['日', '一', '二', '三', '四', '五', '六'] }
+          monthLabel: { nameMap: 'cn', fontSize: 11, color: '#64708a' },
+          dayLabel: { nameMap: ['日', '一', '二', '三', '四', '五', '六'], fontSize: 11, color: '#64708a' }
         },
         series: [{
           type: 'heatmap',
@@ -153,20 +161,34 @@ export default {
       const chart = echarts.init(this.$refs.trendChart)
       const trend = this.visit.trend
       chart.setOption({
-        title: { text: '近 30 天访客趋势', textStyle: { fontSize: 14 } },
+        title: { text: '近 30 天访客趋势', textStyle: TITLE_STYLE },
         tooltip: { trigger: 'axis' },
         grid: { left: 50, right: 20, top: 50, bottom: 40 },
         xAxis: {
           type: 'category',
+          boundaryGap: false,
           data: trend.map(function (i) { return i.day }),
-          axisLabel: { interval: 4 }
+          axisLabel: { interval: 4, fontSize: 11, color: '#64708a' },
+          axisLine: { lineStyle: { color: '#e6e9f0' } }
         },
-        yAxis: { type: 'value', minInterval: 1 },
+        yAxis: {
+          type: 'value',
+          minInterval: 1,
+          axisLabel: { fontSize: 11, color: '#64708a' },
+          splitLine: { lineStyle: { color: '#f0f2f5' } }
+        },
         series: [{
           type: 'line',
           smooth: true,
-          areaStyle: { color: 'rgba(79,140,255,.18)' },
-          itemStyle: { color: '#4F8CFF' },
+          showSymbol: false,
+          itemStyle: { color: '#5B8FF9' },
+          lineStyle: { width: 2.5, color: '#5B8FF9' },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(91,143,249,.32)' },
+              { offset: 1, color: 'rgba(91,143,249,0)' }
+            ])
+          },
           data: trend.map(function (i) { return i.count })
         }]
       })
@@ -176,11 +198,15 @@ export default {
       if (!this.$refs.osChart || !this.visit.os || !this.visit.os.length) return
       const chart = echarts.init(this.$refs.osChart)
       chart.setOption({
-        title: { text: '访客系统分布 TOP6', textStyle: { fontSize: 14 } },
-        tooltip: { trigger: 'item' },
+        title: { text: '访客系统分布 TOP6', textStyle: TITLE_STYLE },
+        color: CHART_COLORS,
+        tooltip: { trigger: 'item', formatter: '{b}：{c} 次（{d}%）' },
+        legend: { bottom: 0, type: 'scroll', icon: 'circle', itemWidth: 8, itemHeight: 8, textStyle: { fontSize: 11, color: '#64708a' } },
         series: [{
           type: 'pie',
-          radius: ['35%', '58%'],
+          radius: ['42%', '66%'],
+          center: ['50%', '44%'],
+          label: { show: false },
           data: this.visit.os.map(function (i) { return { name: i.name, value: i.count } })
         }]
       })
@@ -190,11 +216,16 @@ export default {
       if (!this.$refs.categoryChart || !this.categoryStats.length) return
       const chart = echarts.init(this.$refs.categoryChart)
       chart.setOption({
-        title: { text: '分类文章分布', textStyle: { fontSize: 14 } },
-        tooltip: { trigger: 'item' },
+        title: { text: '分类文章分布', textStyle: TITLE_STYLE },
+        color: CHART_COLORS,
+        tooltip: { trigger: 'item', formatter: '{b}：{c} 篇（{d}%）' },
+        legend: { bottom: 0, type: 'scroll', icon: 'circle', itemWidth: 8, itemHeight: 8, textStyle: { fontSize: 11, color: '#64708a' } },
         series: [{
           type: 'pie',
-          radius: ['35%', '58%'],
+          radius: ['42%', '66%'],
+          center: ['50%', '44%'],
+          avoidLabelOverlap: true,
+          label: { show: false },
           data: this.categoryStats.map(function (i) { return { name: i.name, value: i.count } })
         }]
       })
@@ -205,18 +236,28 @@ export default {
       const chart = echarts.init(this.$refs.topChart)
       const data = this.topArticles.slice().reverse()
       chart.setOption({
-        title: { text: '热门文章 TOP10', textStyle: { fontSize: 14 } },
-        tooltip: { trigger: 'axis' },
-        grid: { left: 170, right: 40, top: 50 },
-        xAxis: { type: 'value' },
+        title: { text: '热门文章 TOP10', textStyle: TITLE_STYLE },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'none' } },
+        grid: { left: 10, right: 30, top: 50, bottom: 10, containLabel: true },
+        xAxis: { type: 'value', splitLine: { lineStyle: { color: '#f0f2f5' } } },
         yAxis: {
           type: 'category',
-          data: data.map(function (i) { return i.title.length > 20 ? i.title.slice(0, 20) + '…' : i.title })
+          data: data.map(function (i) { return i.title.length > 14 ? i.title.slice(0, 14) + '…' : i.title }),
+          axisTick: { show: false },
+          axisLine: { show: false },
+          axisLabel: { fontSize: 11, color: '#64708a' }
         },
         series: [{
           type: 'bar',
-          data: data.map(function (i) { return i.viewCount }),
-          itemStyle: { color: '#4F8CFF' }
+          barWidth: 10,
+          itemStyle: {
+            borderRadius: [0, 5, 5, 0],
+            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+              { offset: 0, color: '#5B8FF9' },
+              { offset: 1, color: '#7262FD' }
+            ])
+          },
+          data: data.map(function (i) { return i.viewCount })
         }]
       })
       this.charts.push(chart)

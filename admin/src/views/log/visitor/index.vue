@@ -67,7 +67,11 @@ export default {
             };
         },
         initChart() {
-            let myChart = echarts.init(this.$refs.chart, 'dark');
+            // 实例只创建一次，之后用 notMerge 完全替换配置，保证切换时间范围后图表正确刷新
+            if (!this.chartLine) {
+                this.chartLine = echarts.init(this.$refs.chart, 'dark');
+            }
+            let myChart = this.chartLine;
             let processedData = this.processData(this.data);
             myChart.setOption({
                 title: {
@@ -89,10 +93,13 @@ export default {
                     type: 'line',
                     smooth: true
                 }]
-            });
+            }, true);
         },
         initChartMap() {
-            let myChart = echarts.init(this.$refs.chartMap, 'dark');
+            if (!this.chartMapInst) {
+                this.chartMapInst = echarts.init(this.$refs.chartMap, 'dark');
+            }
+            let myChart = this.chartMapInst;
 
             // 处理地区访问数据，统计每个地区的访问次数
             let areaData = {};
@@ -174,10 +181,13 @@ export default {
                 }
             };
 
-            myChart.setOption(option);
+            myChart.setOption(option, true);
         },
         initChartBar() {
-            let myChart = echarts.init(this.$refs.chartBar, 'dark');
+            if (!this.chartBarInst) {
+                this.chartBarInst = echarts.init(this.$refs.chartBar, 'dark');
+            }
+            let myChart = this.chartBarInst;
 
             // 处理非中国地区访问数据，统计每个国家的访问次数
             let countryData = {};
@@ -219,7 +229,7 @@ export default {
                 ]
             };
 
-            myChart.setOption(option);
+            myChart.setOption(option, true);
         }
     },
     mounted() {

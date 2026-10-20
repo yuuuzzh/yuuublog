@@ -673,8 +673,10 @@ CREATE TABLE `yuuu_favorite`  (
   UNIQUE INDEX `uk_favorite_user_article`(`user_id`, `article_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '文章收藏' ROW_FORMAT = Dynamic;
 
--- 后台菜单：关于（顶层）
-INSERT INTO `sys_menu` VALUES (2083, '关于', 0, 9, 'about', 'about/index', 1, 'C', '0', '0', '', 'info', 1, NOW(), 1, NOW(), '', '0');
+-- 后台菜单：关于（顶层，所有角色可见）
+INSERT INTO `sys_menu` VALUES (2083, '关于', 0, 9, 'about', 'about/index', 1, 'C', '0', '0', '', 'documentation', 1, NOW(), 1, NOW(), '', '0');
+INSERT INTO `sys_role_menu` (role_id, menu_id) SELECT r.id, 2083 FROM `sys_role` r
+WHERE NOT EXISTS (SELECT 1 FROM `sys_role_menu` rm WHERE rm.role_id = r.id AND rm.menu_id = 2083);
 
 -- 评论审核状态字段：0待审核 1通过 2屏蔽（已有评论默认通过）
 ALTER TABLE `yuuu_comment` ADD COLUMN `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '1' COMMENT '状态（0待审核 1通过 2屏蔽）' AFTER `type`;
