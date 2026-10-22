@@ -419,17 +419,90 @@ a {
 }
 
 //时间和标题
-.s-round-date {
+/* 详情页头部：日期徽章（月份大、日期小，左右排）+ 标题/信息/分类 */
+/* 悬挂吊牌：钉在卡片顶边、垂直垂落，带轻微摆动（瀑布感） */
+.arHead {
+    position: relative;
+    padding-top: 52px;
+    margin-bottom: 14px;
+}
+
+.arHead .arMain {
+    min-width: 0;
+}
+
+.arDate {
     position: absolute;
-    top: -20px;
-    left: -35px;
-    height: 60px;
-    width: 70px;
-    padding-top: 10px;
-    border-radius: 100px;
-    color: #fff;
-    background: @tcolors;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+    top: -8px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 18px 13px;
+    border-radius: 0 0 14px 14px;
+    /* 白底毛玻璃吊牌 */
+    background: rgba(255, 255, 255, .55);
+    -webkit-backdrop-filter: blur(14px) saturate(170%);
+    backdrop-filter: blur(14px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, .6);
+    color: var(--text, #3d4759);
+    box-shadow: 0 8px 20px rgba(20, 40, 90, .12);
+    transform-origin: top center;
+    animation: tagSway 3.8s ease-in-out infinite;
+}
+
+/* 顶部钉孔：牌子挂在卡片顶边的"钉子"上 */
+.arDate::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e8edf5;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28);
+}
+
+.arDate .arMonth {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.arDate .arDay {
+    font-size: 13px;
+    opacity: .85;
+    line-height: 1;
+    padding-left: 8px;
+    border-left: 1px solid rgba(0, 0, 0, .15);
+}
+
+@keyframes tagSway {
+
+    0%,
+    100% {
+        transform: rotate(-1.4deg);
+    }
+
+    50% {
+        transform: rotate(1.4deg);
+    }
+}
+
+.arDate .arMonth {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.arDate .arDay {
+    font-size: 13px;
+    opacity: .85;
+    line-height: 1;
+    padding-left: 8px;
+    border-left: 1px solid rgba(0, 0, 0, .15);
 }
 
 .s-round-date span {
@@ -624,17 +697,15 @@ a {
         margin: 0 auto;
     }
 
-    .s-round-date {
-        width: 0 !important;
-    }
+
 
     .ui.label {
-        left: -18px !important;
-        padding-left: 18px !important;
+        left: 0 !important;
+        padding: 6px 12px !important;
     }
 
     .ui.label::after {
-        border: none !important;
+        display: none !important;
     }
 
     .headBox li.el-menu-item,
@@ -784,33 +855,69 @@ a {
     border-color: @tcolors;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
     background-color: #97dffd;
-    margin: 5px 0 15px 2px;
+    /* 取消原来挂到卡片左边缘外侧的偏移与三角形，改为干净圆角标签 */
+    margin: 5px 0 15px 0;
     font-size: 14px;
-    position: relative;
-    left: -32px;
-    border-radius: 0 4px 4px 0;
-    padding: 7px 11.2px 7px 32px;
+    border-radius: 4px;
+    padding: 6px 12px;
     display: inline-block;
     color: #fff;
 }
 
 .ui.label::after {
-    position: absolute;
-    content: '';
-    top: 100%;
-    left: 0;
-    border-top: 0 solid transparent;
-    border-right-width: 1em;
-    border-right-color: @tcolord;
-    border-right-style: solid;
-    border-bottom: 1em solid transparent;
-    border-left: 0 solid transparent;
-    width: 0;
-    height: 0;
+    display: none;
 }
 
 .ui.label a {
     color: #fff;
     line-height: 100%;
+}
+
+// 详情页：分类标签固定到卡片右上角（红框位置），移动端回落为普通标签
+.detailBox .ui.label {
+    position: absolute;
+    top: -8px;
+    right: 30px;
+    margin: 0;
+    padding: 18px 16px 13px;
+    border-radius: 0 0 14px 14px;
+    /* 白底毛玻璃吊牌 */
+    background: rgba(255, 255, 255, .55);
+    -webkit-backdrop-filter: blur(14px) saturate(170%);
+    backdrop-filter: blur(14px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, .6);
+    color: var(--text, #3d4759);
+    box-shadow: 0 8px 20px rgba(20, 40, 90, .12);
+    transform-origin: top center;
+    animation: tagSway 3.8s ease-in-out infinite;
+    animation-delay: .6s;
+}
+
+.detailBox .ui.label a {
+    color: var(--text, #3d4759);
+}
+
+.detailBox .ui.label::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e8edf5;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28);
+}
+
+@media screen and (max-width: 800px) {
+    .detailBox .ui.label {
+        top: -8px;
+        right: 16px;
+    }
+
+    .arDate {
+        left: 14px;
+    }
 }
 </style>

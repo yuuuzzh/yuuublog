@@ -1,11 +1,13 @@
 <!-- 文章详情模块 -->
 <template>
   <div class="detailBox tcommonBox">
-    <span class="s-round-date">
-      <span class="month" v-html="showInitDate(detailObj.createTime, 'month') + '月'"></span>
-      <span class="day" v-html="showInitDate(detailObj.createTime, 'date')"></span>
-    </span>
-    <header>
+    <div class="arHead">
+      <div class="arDate">
+        <span class="arMonth" v-html="showInitDate(detailObj.createTime, 'month') + '月'"></span>
+        <span class="arDay" v-html="showInitDate(detailObj.createTime, 'date') + '日'"></span>
+      </div>
+      <div class="arMain">
+      <header>
       <h1>
         <!-- <a :href="'/DetailShare?aid='+detailObj.id" target="_blank">
                         {{detailObj.title}}
@@ -24,6 +26,8 @@
         <a :href="'/Share?classId=' + detailObj.categoryId">{{ detailObj.categoryName }}</a>
       </div>
     </header>
+      </div>
+    </div>
     <ArticleToc :toc="toc" />
 
     <div class="article-content markdown-body" ref="content" v-html="detailObj.content" @click="onContentClick"></div>
@@ -59,16 +63,23 @@
       <div class="donate-word">
         <span @click="pdonate = !pdonate">赞赏</span>
         <div class="btnMenuCss">
-          <img style="width: 35px; height: 35px; cursor: pointer;" :src="iconSrc" @click="toggleLike" />
-          <img style="width: 35px; height: 35px; cursor: pointer;" :src="iconSrcDis" @click="toggleDisLike" />
-          <el-button style="margin-left: 5px;" size="small" type="primary" @click="forwardPage"
-            icon="el-icon-share"></el-button>
-          <el-button size="small" :type="favorited ? 'warning' : 'primary'" @click="toggleFavorite"
-            :icon="favorited ? 'el-icon-star-on' : 'el-icon-star-off'">
-            {{ favorited ? '已收藏' : '收藏' }}
-          </el-button>
-          <el-button size="small" type="primary" @click="downloadById" icon="el-icon-download"></el-button>
-        </div>
+        <button type="button" class="btnAct bLike" :class="{ on: isLiked }" @click="toggleLike" title="点赞">
+          <i class="fa" :class="isLiked ? 'fa-heart' : 'fa-thumbs-o-up'"></i>
+        </button>
+        <button type="button" class="btnAct bDislike" @click="toggleDisLike" title="踩">
+          <i class="fa fa-thumbs-o-down"></i>
+        </button>
+        <button type="button" class="btnAct bShare" @click="forwardPage" title="分享">
+          <i class="fa fa-share-alt"></i>
+        </button>
+        <button type="button" class="btnAct bFav" :class="{ on: favorited }" @click="toggleFavorite"
+          :title="favorited ? '已收藏' : '收藏'">
+          <i class="fa" :class="favorited ? 'fa-star' : 'fa-star-o'"></i>
+        </button>
+        <button type="button" class="btnAct bDown" @click="downloadById" title="下载">
+          <i class="fa fa-download"></i>
+        </button>
+      </div>
       </div>
       <el-row :class="pdonate ? 'donate-body' : 'donate-body donate-body-show'" :gutter="30">
         <el-col :span="12" class="donate-item">
@@ -340,9 +351,72 @@ export default {
 .btnMenuCss {
   display: flex;
   align-items: center;
-  position: absolute;
-  right: 25px;
-  top: 0;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+/* 圆形图标按钮：原生 button，不受组件库样式干扰；各操作独立配色，无阴影 */
+.btnMenuCss .btnAct {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  font-size: 17px;
+  color: #6b7686;
+  background: #fff;
+  border: 1.5px solid #e3e8f2;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.btnMenuCss .btnAct i {
+  margin: 0;
+}
+
+.btnMenuCss .btnAct:hover {
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.btnMenuCss .btnAct.bLike:hover {
+  background: #ff5e57;
+  border-color: #ff5e57;
+}
+
+.btnMenuCss .btnAct.bLike.on {
+  background: #ff5e57;
+  border-color: #ff5e57;
+  color: #fff;
+}
+
+.btnMenuCss .btnAct.bDislike:hover {
+  background: #909399;
+  border-color: #909399;
+}
+
+.btnMenuCss .btnAct.bShare:hover {
+  background: #4F8CFF;
+  border-color: #4F8CFF;
+}
+
+.btnMenuCss .btnAct.bFav:hover {
+  background: #F6BD16;
+  border-color: #F6BD16;
+}
+
+.btnMenuCss .btnAct.bFav.on {
+  background: #F6BD16;
+  border-color: #F6BD16;
+  color: #fff;
+}
+
+.btnMenuCss .btnAct.bDown:hover {
+  background: #34D1A5;
+  border-color: #34D1A5;
 }
 
 .detailBox .article-content {
