@@ -170,18 +170,40 @@ export default {
     async downloadById() {
       try {
         const response = await request.get(`/article/download/${this.aid}`, {}, { responseType: 'blob' });
-        const content = response.content;
-            const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-            const link = document.createElement('a');
-            link.style.display = 'none';
-            link.href = URL.createObjectURL(blob);
-            link.download = response.title + '.docx';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(link.href);
-            this.$message.success('客官莫急，已经在飞速下载了~(推荐使用WPS)');
-          
+        // 后端返回的是 Markdown 转出的 HTML 片段。此前直接把它存成 .docx（HTML 伪装 OOXML），
+        // Word 会报"发现无法读取的内容"。改为包裹 Word 官方支持的 HTML 格式并以 .doc 保存，
+        // Microsoft Word / WPS 均可直接打开，无需恢复。
+        const title = (response.title || '文章').replace(/[\\/:*?"<>|]/g, '_');
+        const wordDocument = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset='utf-8'>
+<title>${response.title || '文章'}</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:TrackMoves>false</w:TrackMoves><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
+<style>
+  body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; font-size: 12pt; line-height: 1.8; color: #24292f; }
+  h1, h2, h3, h4 { color: #1d2433; line-height: 1.4; }
+  img { max-width: 100%; }
+  pre { background: #f6f8fa; padding: 10px 12px; white-space: pre-wrap; word-break: break-all; border-radius: 4px; font-family: Consolas, 'Courier New', monospace; font-size: 10.5pt; }
+  code { font-family: Consolas, 'Courier New', monospace; font-size: 10.5pt; background: #f0f2f5; padding: 1px 4px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #c8ccd4; padding: 6px 10px; }
+  th { background: #f0f2f5; }
+  blockquote { border-left: 4px solid #97dffd; margin: 10px 0; padding: 4px 14px; color: #555; background: #f7fbff; }
+</style>
+</head>
+<body>${response.content || ''}</body>
+</html>`;
+        // \ufeff BOM 保证 Word 识别 UTF-8 中文不乱码
+        const blob = new Blob(['\ufeff', wordDocument], { type: 'application/msword' });
+        const link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = URL.createObjectURL(blob);
+        link.download = title + '.doc';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+        this.$message.success('客官莫急，已经在飞速下载了~');
       } catch (error) {
         console.error('下载失败', error);
         this.$message.error('下载失败，请重试或联系管理员');
