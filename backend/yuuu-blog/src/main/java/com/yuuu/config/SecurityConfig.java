@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -59,9 +60,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/logout").authenticated()
                 .antMatchers("/user/userInfo").authenticated()
                 .antMatchers("/ip").authenticated()
+                // 发表评论需要登录
                 .antMatchers("/comment").authenticated()
-                // 删除自己的评论：/comment/{id}
-                .antMatchers("/comment/**").authenticated()
+                // 评论相关写操作需要登录（删除自己的评论 DELETE /comment/{id}）；
+                // 列表与点赞数为匿名可读（GET /comment/commentList、/comment/linkCommentList、/comment/likes/{id}）
+                .antMatchers(HttpMethod.DELETE, "/comment/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/comment/**").authenticated()
                 .antMatchers("/like/**").authenticated()
                 .antMatchers("/chat/**").authenticated()
                 // 文章收藏（需要登录）
