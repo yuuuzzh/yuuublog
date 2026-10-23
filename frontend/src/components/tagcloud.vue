@@ -4,7 +4,8 @@
         <h1 class="tag-title">标签云</h1>
         <div class="tag-list">
             <a v-for="(item,index) in tagList" :key="'t'+index" class="tag-item"
-                :href="'/Share?tagId='+item.id" :style="tagStyle(item.articleCount)">
+                :class="'level-' + hotLevel(item.articleCount)" :href="'/Share?tagId='+item.id"
+                :style="tagStyle(item.articleCount)">
                 {{ item.name }}<span class="tag-count">{{ item.articleCount }}</span>
             </a>
         </div>
@@ -31,27 +32,20 @@ export default {
                 that.tagList = [];
             });
         },
-        // 文章越多，标签越大；按 id 确定性分配一组渐变色，避免每次渲染变色
-        tagStyle(item) {
-            var palettes = [
-                'linear-gradient(120deg, #4F8CFF, #7B6CFF)',
-                'linear-gradient(120deg, #FF7AC6, #FF9A8B)',
-                'linear-gradient(120deg, #38C6D9, #4F8CFF)',
-                'linear-gradient(120deg, #7B6CFF, #C86DD7)',
-                'linear-gradient(120deg, #FFB86C, #FF7AC6)',
-                'linear-gradient(120deg, #34D1A5, #38C6D9)'
-            ];
-            var idx = 0, s = String(item.id || '');
-            for (var i = 0; i < s.length; i++) {
-                idx += s.charCodeAt(i);
-            }
-            var count = item.articleCount || 1;
-            var size = count >= 10 ? 16 : (count >= 5 ? 15 : 13);
+        // 热度分档：0 冷门 -> 3 热门（字号与配色深浅都按档位递进）
+        hotLevel(count) {
+            var c = count || 1;
+            if (c >= 10) return 3;
+            if (c >= 5) return 2;
+            if (c >= 2) return 1;
+            return 0;
+        },
+        // 文章越多，标签越大
+        tagStyle(count) {
+            var level = this.hotLevel(count);
+            var sizes = [13, 14, 15, 16];
             return {
-                background: palettes[idx % palettes.length],
-                color: '#fff',
-                fontSize: size + 'px',
-                boxShadow: '0 4px 14px rgba(79, 140, 255, .18)'
+                fontSize: sizes[level] + 'px'
             };
         }
     },
@@ -62,7 +56,10 @@ export default {
 </script>
 
 <style>
+/* 标签云：独立橙色系热度变量（不影响全站主色） */
 .tagCloudBox {
+    --hot: #FF8A3D;
+    --hot-2: #FF5E2E;
     background: var(--surface);
     padding: 15px;
     border-radius: 5px;
@@ -90,20 +87,51 @@ export default {
     gap: 5px;
     padding: 5px 12px;
     border-radius: 999px;
-    color: #fff;
+    /* 低饱和淡底 + 主题色文字：白底/黑底都柔和，hover 点亮 */
+    color: var(--hot);
+    background: color-mix(in srgb, var(--hot) 9%, transparent);
+    border: 1px solid color-mix(in srgb, var(--hot) 24%, transparent);
     text-decoration: none;
     letter-spacing: .5px;
-    transition: transform .25s var(--ease, ease), box-shadow .25s var(--ease, ease), filter .25s var(--ease, ease);
+    transition: transform .25s var(--ease, ease), background .25s var(--ease, ease), color .25s var(--ease, ease), border-color .25s var(--ease, ease);
 }
 
 .tag-item:hover {
-    transform: translateY(-3px) scale(1.05);
-    filter: brightness(1.08);
-    box-shadow: 0 8px 20px rgba(79, 140, 255, .35);
+    color: #fff;
+    background: linear-gradient(120deg, var(--hot), var(--hot-2));
+    border-color: transparent;
+    transform: translateY(-3px);
+}
+
+/* 热度分层：同色系由浅入深，热度越高越浓（非随机彩色，明暗背景都不突兀） */
+.tag-item.level-0 {
+    background: color-mix(in srgb, var(--hot) 8%, transparent);
+    border-color: color-mix(in srgb, var(--hot) 22%, transparent);
+}
+
+.tag-item.level-1 {
+    background: color-mix(in srgb, var(--hot) 18%, transparent);
+    border-color: color-mix(in srgb, var(--hot) 34%, transparent);
+}
+
+.tag-item.level-2 {
+    background: color-mix(in srgb, var(--hot) 38%, transparent);
+    border-color: color-mix(in srgb, var(--hot) 52%, transparent);
+}
+
+.tag-item.level-3 {
+    background: linear-gradient(120deg, var(--hot), var(--hot-2));
+    color: #fff;
+    border-color: transparent;
+}
+
+.tag-item.level-3 .tag-count {
+    background: rgba(255, 255, 255, .26);
+    color: #fff;
 }
 
 .tag-item .tag-count {
-    background: rgba(255, 255, 255, .22);
+    background: color-mix(in srgb, var(--hot) 16%, transparent);
     border-radius: 999px;
     padding: 0 6px;
     font-size: 11px;

@@ -331,15 +331,18 @@ export default {
     padding: 7px 16px;
     font-size: 13px;
     border-radius: 999px;
-    color: #fff;
-    background: linear-gradient(120deg, var(--brand), var(--brand-2));
-    box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 30%, transparent);
-    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    /* 低饱和描边胶囊：白底/黑底都柔和，hover 才点亮 */
+    color: var(--brand);
+    background: color-mix(in srgb, var(--brand) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand) 32%, transparent);
+    transition: transform .3s var(--ease), background .3s var(--ease), color .3s var(--ease), border-color .3s var(--ease);
 }
 
 .read-more:hover {
+    color: #fff;
+    background: linear-gradient(120deg, var(--brand), var(--brand-2));
+    border-color: transparent;
     transform: translateX(4px);
-    box-shadow: 0 10px 26px color-mix(in srgb, var(--brand) 42%, transparent);
 }
 
 .read-more .fa {

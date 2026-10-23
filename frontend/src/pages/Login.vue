@@ -565,11 +565,10 @@ export default {
     max-width: 92vw;
     padding: 34px 34px 30px;
     border-radius: 20px;
-    background: rgba(255, 255, 255, .58);
-    -webkit-backdrop-filter: blur(26px) saturate(170%);
-    backdrop-filter: blur(26px) saturate(170%);
-    border: 1px solid rgba(255, 255, 255, .55);
-    box-shadow: 0 26px 70px rgba(10, 18, 40, .38);
+    /* 不使用毛玻璃（无模糊）：卡片为半透明实色，卡内文字清晰，背景图在卡片外可见 */
+    background: rgba(255, 255, 255, .70);
+    border: 1px solid rgba(255, 255, 255, .6);
+    box-shadow: 0 26px 70px rgba(10, 18, 40, .30);
     animation: cardIn .55s cubic-bezier(.22, .8, .36, 1);
 }
 
