@@ -385,9 +385,9 @@ export default {
   height: 46px;
   border-radius: 50%;
   font-size: 17px;
-  color: #6b7686;
-  background: #fff;
-  border: 1.5px solid #e3e8f2;
+  color: var(--text-weak);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
   cursor: pointer;
   display: inline-flex;
   align-items: center;

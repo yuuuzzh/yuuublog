@@ -600,13 +600,13 @@ export default {
 .formTitle {
     font-size: 25px;
     font-weight: 700;
-    color: #1d2433;
+    color: var(--text);
     margin: 0 0 6px;
 }
 
 .formSub {
     font-size: 13px;
-    color: #64708a;
+    color: var(--text-weak);
     margin: 0 0 22px;
 }
 
@@ -619,7 +619,7 @@ export default {
     display: block;
     font-size: 13px;
     font-weight: 500;
-    color: #64708a;
+    color: var(--text-weak);
     margin-bottom: 7px;
 }
 
@@ -627,9 +627,9 @@ export default {
     height: 44px;
     font-size: 14px;
     border-radius: 10px;
-    border: 1px solid #e6e9f0;
+    border: 1px solid var(--border);
     background: rgba(91, 143, 249, .04);
-    color: #1d2433;
+    color: var(--text);
     transition: border-color .25s ease, box-shadow .25s ease;
 }
 
@@ -641,7 +641,7 @@ export default {
 .lgInput .el-input__suffix i {
     cursor: pointer;
     line-height: 44px;
-    color: #64708a;
+    color: var(--text-weak);
     padding-right: 4px;
 }
 
@@ -772,7 +772,7 @@ export default {
     top: -11px;
     padding: 0 12px;
     font-size: 12px;
-    color: #64708a;
+    color: var(--text-weak);
     background: transparent;
 }
 
@@ -789,9 +789,9 @@ export default {
     gap: 6px;
     height: 42px;
     font-size: 13px;
-    color: #1d2433;
+    color: var(--text);
     text-decoration: none;
-    border: 1px solid #e6e9f0;
+    border: 1px solid var(--border);
     border-radius: 10px;
     background: rgba(91, 143, 249, .04);
     transition: transform .25s ease, border-color .25s ease, color .25s ease;
@@ -821,7 +821,7 @@ export default {
 .switchLine {
     margin: 20px 0 0;
     font-size: 13px;
-    color: #64708a;
+    color: var(--text-weak);
     text-align: center;
 }
 

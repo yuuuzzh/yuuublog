@@ -522,8 +522,10 @@ a {
     word-break: break-all;
     position: relative;
     background: var(--surface);
-    padding: 15px;
-    border-radius: 5px;
+    padding: 18px;
+    /* 与文章卡一致：圆角走 --radius + 细描边（全站卡片观感统一） */
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     margin-bottom: 40px;
     font-size: 15px;
     box-shadow: var(--shadow-1);
