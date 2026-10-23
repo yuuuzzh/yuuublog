@@ -443,7 +443,9 @@ export default {
 
 .detailBox .article-content {
   /* 移动端「阅读设置」里的字号调节通过 --font-scale 生效（~"" 转义，避免 Less 自行计算 calc） */
-  font-size: ~"calc(15px * var(--font-scale, 1))";
+  font-size: ~"calc(16px * var(--font-scale, 1))";
+  line-height: 1.85;
+  color: var(--text);
   white-space: normal;
   word-wrap: break-word;
   word-break: break-all;
@@ -451,11 +453,41 @@ export default {
 }
 
 .detailBox .article-content p {
-  margin: 10px 0;
-  line-height: 24px;
+  margin: 0 0 16px;
+  line-height: 1.85;
   word-wrap: break-word;
   word-break: break-all;
   overflow-x: hidden;
+}
+
+/* 标题与列表的呼吸感 */
+.detailBox .article-content h1,
+.detailBox .article-content h2,
+.detailBox .article-content h3,
+.detailBox .article-content h4 {
+  margin: 30px 0 14px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.detailBox .article-content ul,
+.detailBox .article-content ol {
+  margin: 0 0 16px;
+  padding-left: 24px;
+}
+
+.detailBox .article-content li {
+  margin: 6px 0;
+  line-height: 1.8;
+}
+
+.detailBox .article-content blockquote {
+  margin: 18px 0;
+  padding: 10px 16px;
+  border-left: 3px solid var(--brand);
+  background: color-mix(in srgb, var(--brand) 7%, transparent);
+  border-radius: 0 8px 8px 0;
+  color: var(--text-weak);
 }
 
 .detailBox .article-content pre {

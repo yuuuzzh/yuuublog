@@ -145,9 +145,9 @@ export default {
 .article-card {
     position: relative;
     display: flex;
-    gap: 20px;
-    margin-bottom: 22px;
-    padding: 16px;
+    gap: 24px;
+    margin-bottom: 26px;
+    padding: 22px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -174,8 +174,8 @@ export default {
 
 .card-cover {
     position: relative;
-    flex: 0 0 240px;
-    height: 156px;
+    flex: 0 0 264px;
+    height: 176px;
     border-radius: var(--radius-sm);
     overflow: hidden;
     background: var(--bg-soft);
@@ -271,8 +271,8 @@ export default {
 }
 
 .card-title {
-    margin: 0 0 8px;
-    font-size: 19px;
+    margin: 0 0 10px;
+    font-size: 20px;
     line-height: 1.4;
     font-weight: 700;
 }
