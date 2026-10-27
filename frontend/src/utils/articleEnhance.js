@@ -1,9 +1,10 @@
 /**
  * 文章正文增强（作用于 v-html 渲染后的 DOM）
  *  - buildToc：为 h2~h4 补锚点 id 并抽取目录
- *  - enhanceCodeBlocks：代码块包装（语言标签 + 一键复制 + 超长折叠）
+ *  - enhanceCodeBlocks：代码块包装（自动高亮 + 悬浮语言标签/复制/折叠）
  *  - countWords：正文字数与预计阅读时长
  */
+import hljs from 'highlight.js'
 
 function slugId(index) {
   return 'sec-' + (index + 1)
@@ -51,8 +52,40 @@ export function enhanceCodeBlocks(root) {
     if (!pre.parentNode || pre.parentNode.classList.contains('code-block')) return
 
     const code = pre.querySelector('code')
-    const langMatch = code ? /language-([\w+#-]+)/.exec(code.className || '') : null
-    const lang = langMatch ? langMatch[1] : ''
+    let langMatch = code ? /language-([\w+#-]+)/.exec(code.className || '') : null
+    let lang = langMatch ? langMatch[1] : ''
+
+    // 无语言标记的代码块（如 CSDN 导入的文章）：highlight.js 自动检测语言并补高亮
+    if (code && !lang && !/hljs/.test(code.className)) {
+      try {
+        const raw = code.textContent || ''
+        if (raw.trim().length > 8) {
+          // Java 代码特征强判（避免 highlightAuto 把 Java 误判为 GO/CSS 等导致高亮失败）
+          const isJava = /public\s+(static\s+)?[\w<>\[\],\s]+\s+\w+\s*\(|void\s+\w+\s*\(|System\.out\.print|import\s+java\./.test(raw)
+          let value, detected
+          if (isJava) {
+            value = hljs.highlight(raw, { language: 'java' }).value
+            detected = 'java'
+          } else {
+            // 限定候选语言，避免误判到小众语言导致高亮失败
+            const result = hljs.highlightAuto(raw, [
+              'java', 'sql', 'xml', 'javascript', 'typescript', 'html',
+              'css', 'python', 'c', 'cpp', 'bash', 'json', 'yaml', 'go'
+            ])
+            value = result.value
+            detected = result.language
+          }
+          code.innerHTML = value
+          code.classList.add('hljs')
+          if (detected) {
+            lang = detected
+            code.classList.add('language-' + detected)
+          }
+        }
+      } catch (e) {
+        // 自动高亮失败则保持纯文本
+      }
+    }
 
     const wrap = document.createElement('div')
     wrap.className = 'code-block'
