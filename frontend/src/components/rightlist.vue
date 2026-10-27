@@ -216,18 +216,21 @@ export default {
   position: relative;
 }
 
+/* 侧栏卡片：与全站卡片统一（--radius 圆角 + 细描边 + 主题阴影），hover 走 token */
 .rightlistBox section {
-  transition: all 0.2s linear;
+  transition: transform .3s var(--ease, ease), box-shadow .3s var(--ease, ease);
   position: relative;
   background: var(--surface);
-  padding: 15px;
+  padding: 18px;
   margin-bottom: 20px;
-  border-radius: 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
 }
 
 .rightlistBox section:hover {
-  transform: translate(0, -2px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  transform: translate(0, -3px);
+  box-shadow: var(--shadow-2);
 }
 
 .rightlistBox .r1-head {

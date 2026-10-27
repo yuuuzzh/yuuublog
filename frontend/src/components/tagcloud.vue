@@ -56,10 +56,8 @@ export default {
 </script>
 
 <style>
-/* 标签云：独立橙色系热度变量（不影响全站主色） */
+/* 标签云：与全站统一的主题色系，热度用浓度与字号表达 */
 .tagCloudBox {
-    --hot: #FF8A3D;
-    --hot-2: #FF5E2E;
     background: var(--surface);
     padding: 15px;
     border-radius: 5px;
@@ -88,9 +86,9 @@ export default {
     padding: 5px 12px;
     border-radius: 999px;
     /* 低饱和淡底 + 主题色文字：白底/黑底都柔和，hover 点亮 */
-    color: var(--hot);
-    background: color-mix(in srgb, var(--hot) 9%, transparent);
-    border: 1px solid color-mix(in srgb, var(--hot) 24%, transparent);
+    color: var(--text-weak);
+    background: color-mix(in srgb, var(--brand) 9%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand) 24%, transparent);
     text-decoration: none;
     letter-spacing: .5px;
     transition: transform .25s var(--ease, ease), background .25s var(--ease, ease), color .25s var(--ease, ease), border-color .25s var(--ease, ease);
@@ -98,31 +96,47 @@ export default {
 
 .tag-item:hover {
     color: #fff;
-    background: linear-gradient(120deg, var(--hot), var(--hot-2));
+    background: linear-gradient(120deg, var(--brand), var(--brand-2));
     border-color: transparent;
     transform: translateY(-3px);
 }
 
-/* 热度分层：同色系由浅入深，热度越高越浓（非随机彩色，明暗背景都不突兀） */
+.tag-item:hover .tag-count {
+    background: rgba(255, 255, 255, .26);
+    color: #fff;
+}
+
+/* 热度分层（参考掘金/GitHub Topics 的克制做法）：
+   冷门 = 灰描边素底 / 一般 = 淡主题色 / 较热 = 更浓 / 最热 = 主题色实心 */
 .tag-item.level-0 {
-    background: color-mix(in srgb, var(--hot) 8%, transparent);
-    border-color: color-mix(in srgb, var(--hot) 22%, transparent);
+    background: transparent;
+    border-color: var(--border-strong);
+    color: var(--text-weak);
+}
+
+.tag-item.level-0 .tag-count {
+    background: var(--bg-soft);
+    color: var(--text-weak);
 }
 
 .tag-item.level-1 {
-    background: color-mix(in srgb, var(--hot) 18%, transparent);
-    border-color: color-mix(in srgb, var(--hot) 34%, transparent);
+    background: color-mix(in srgb, var(--brand) 7%, transparent);
+    border-color: color-mix(in srgb, var(--brand) 22%, transparent);
+    color: var(--brand);
 }
 
 .tag-item.level-2 {
-    background: color-mix(in srgb, var(--hot) 38%, transparent);
-    border-color: color-mix(in srgb, var(--hot) 52%, transparent);
+    background: color-mix(in srgb, var(--brand) 16%, transparent);
+    border-color: color-mix(in srgb, var(--brand) 42%, transparent);
+    color: var(--brand);
+    font-weight: 600;
 }
 
 .tag-item.level-3 {
-    background: linear-gradient(120deg, var(--hot), var(--hot-2));
+    background: linear-gradient(120deg, var(--brand), var(--brand-2));
     color: #fff;
     border-color: transparent;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 30%, transparent);
 }
 
 .tag-item.level-3 .tag-count {
@@ -131,7 +145,7 @@ export default {
 }
 
 .tag-item .tag-count {
-    background: color-mix(in srgb, var(--hot) 16%, transparent);
+    background: color-mix(in srgb, var(--brand) 16%, transparent);
     border-radius: 999px;
     padding: 0 6px;
     font-size: 11px;

@@ -209,9 +209,24 @@ export default {
     padding: 10px 20px 0;
 }
 
+/* 结果项改为卡片式：淡底圆角 + 悬停上浮，层次更清晰 */
 .result-item {
-    padding: 14px 0;
-    border-bottom: 1px dashed var(--border);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-3, rgba(255, 255, 255, .5));
+    transition: transform .25s var(--ease, ease), box-shadow .25s var(--ease, ease), border-color .25s var(--ease, ease);
+}
+
+.result-item:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--brand) 40%, transparent);
+    box-shadow: var(--shadow-1);
+}
+
+.result-item:last-child {
+    margin-bottom: 0;
 }
 
 .result-title {

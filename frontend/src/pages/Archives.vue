@@ -117,20 +117,33 @@ export default {
     padding: 0;
 }
 
+/* 归档条目：去掉虚线平铺，改为可悬停高亮的圆角行 */
 .archive-list li {
     display: flex;
     align-items: baseline;
-    gap: 10px;
-    padding: 6px 0;
-    border-bottom: 1px dashed var(--border);
+    gap: 12px;
+    padding: 9px 12px;
+    margin-bottom: 4px;
+    border-radius: var(--radius-sm);
     font-size: 14px;
+    transition: background .25s var(--ease, ease), transform .25s var(--ease, ease);
 }
 
+.archive-list li:hover {
+    background: var(--surface-3, rgba(255, 255, 255, .5));
+    transform: translateX(3px);
+}
+
+/* 日期做成淡色徽章，时间感更明确 */
 .archive-day {
-    width: 28px;
+    width: 30px;
     flex-shrink: 0;
-    color: var(--text-weak);
+    text-align: center;
+    padding: 2px 0;
+    border-radius: 6px;
+    color: var(--brand);
     font-size: 12px;
+    background: color-mix(in srgb, var(--brand) 10%, transparent);
 }
 
 .archive-list a {

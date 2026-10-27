@@ -1429,13 +1429,34 @@ export default {
   border: 0;
 }
 
+/* 代码块操作条：默认隐藏，鼠标悬停代码块时从右上角浮现（不占文档流） */
 .article-content .code-bar {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 3;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
-  background: var(--bg-soft);
-  border-bottom: 1px solid var(--border);
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, .85);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity .22s var(--ease), transform .22s var(--ease);
+  box-shadow: 0 4px 14px rgba(20, 30, 60, .12);
+}
+
+[data-theme='dark'] .article-content .code-bar {
+  background: rgba(22, 29, 48, .85);
+}
+
+.article-content .code-block:hover .code-bar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .article-content .code-lang {
