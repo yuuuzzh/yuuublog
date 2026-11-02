@@ -109,17 +109,24 @@ export default {
 	},
 	methods: { //事件处理器
 		// 首屏文案池：每次刷新随机取一条诗句与一张背景图（接口为空时用默认值）
+		// 返回 Promise：打字机要等随机诗句就位后再启动，否则会打出旧文案
 		loadRandomHeadline() {
 			var that = this;
-			request({
-				url: '/headline/random',
-				headers: { isToken: false },
-				method: 'get'
-			}).then(function (res) {
-				if (!res) return;
-				that.randomQuote = res.quote || '';
-				that.randomBg = res.bgImage || '';
-			}).catch(function () { });
+			return new Promise(function (resolve) {
+				request({
+					url: '/headline/random',
+					headers: { isToken: false },
+					method: 'get'
+				}).then(function (res) {
+					if (res) {
+						that.randomQuote = res.quote || '';
+						that.randomBg = res.bgImage || '';
+					}
+					resolve();
+				}).catch(function () {
+					resolve();
+				});
+			});
 		},
 		handleOpen(key, keyPath) { //分组菜单打开
 			// console.log(key, keyPath);
@@ -281,11 +288,14 @@ export default {
 	},
 	mounted() { //页面元素加载完成
 		var that = this;
-		var timer = setTimeout(function () {
-			Typeit(that.$store.state.themeObj.user_start, "#luke"); //打字机效果
-			TypeitLine(that.signatureText, "#signature", 700); //签名打字机效果
-			clearTimeout(timer);
-		}, 500);
+		// 先等随机诗句加载完成（失败也会 resolve 并回退默认值），再启动打字机
+		this.loadRandomHeadline().then(function () {
+			var timer = setTimeout(function () {
+				Typeit(that.$store.state.themeObj.user_start, "#luke"); //打字机效果
+				TypeitLine(that.signatureText, "#signature", 700); //签名打字机效果
+				clearTimeout(timer);
+			}, 500);
+		});
 		this.onScroll();
 		window.addEventListener('scroll', this.onScroll, { passive: true });
 	},
