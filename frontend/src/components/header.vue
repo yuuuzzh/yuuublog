@@ -108,25 +108,65 @@ export default {
 		}
 	},
 	methods: { //事件处理器
+		// 启动首屏打字机（防重：只启动一次）
+		// 背景图预加载：加载完成后才切换，避免"先空白后突现/半张图"
+		preloadBg: function (url) {
+			var that = this;
+			if (!url) return;
+			var img = new Image();
+			img.onload = function () {
+				that.randomBg = url;
+			};
+			img.onerror = function () {
+				// 加载失败则用默认背景（CSS 兜底）
+				that.randomBg = '';
+			};
+			img.src = url;
+		},
+		startTypewriter: function () {
+			var that = this;
+			if (this._typedFlag) return;
+			this._typedFlag = true;
+			this._typed = true;
+			setTimeout(function () {
+				Typeit(that.$store.state.themeObj.user_start, "#luke"); //打字机效果
+				TypeitLine(that.signatureText, "#signature", 700); //签名打字机效果
+			}, 300);
+		},
 		// 首屏文案池：每次刷新随机取一条诗句与一张背景图（接口为空时用默认值）
+		// DEBUG: 首屏文案时序排查（上线前移除）
 		// 返回 Promise：打字机要等随机诗句就位后再启动，否则会打出旧文案
 		loadRandomHeadline() {
 			var that = this;
-			return new Promise(function (resolve) {
-				request({
-					url: '/headline/random',
-					headers: { isToken: false },
-					method: 'get'
-				}).then(function (res) {
-					if (res) {
-						that.randomQuote = res.quote || '';
-						that.randomBg = res.bgImage || '';
-					}
-					resolve();
-				}).catch(function () {
-					resolve();
-				});
-			});
+			that._headlineRequested = true;
+			// JSONP：script 标签由浏览器直接执行，最可靠（fetch/XHR 曾出现回调不触发的环境问题）
+			var cbName = '__headlineCb' + Date.now();
+			var script = document.createElement('script');
+			var settled = false;
+			var timer = setTimeout(function () {
+				if (!settled) { settled = true; that.startTypewriter(); }
+				cleanup();
+			}, 8000);
+			function cleanup() {
+				clearTimeout(timer);
+				try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+				if (script.parentNode) script.parentNode.removeChild(script);
+			}
+			window[cbName] = function (res) {
+				if (settled) return;
+				settled = true;
+				var data = res || {};
+				that.randomQuote = data.quote || '';
+				// 背景图先预加载，加载完成后再切换（preloadBg 内部处理成功/失败）
+				that.preloadBg(data.bgImage || '');
+				cleanup();
+				that.startTypewriter();
+			};
+			script.src = '/api/headline/random?callback=' + cbName;
+			script.onerror = function () {
+				if (!settled) { settled = true; that.startTypewriter(); cleanup(); }
+			};
+			document.head.appendChild(script);
 		},
 		handleOpen(key, keyPath) { //分组菜单打开
 			// console.log(key, keyPath);
@@ -242,24 +282,36 @@ export default {
 	},
 	computed: {
 		signatureText() {
+			// 优先取后台文案池随机结果，池空回退主题配置/默认
+			if (this.randomQuote) return this.randomQuote;
 			var themeObj = this.$store.state.themeObj;
 			return (themeObj && themeObj.autograph) ? themeObj.autograph : '且将新火试新茶，诗酒趁年华';
 		},
 		heroBgStyle() {
-			var bg = this.$store.state.themeObj.top_image
-				? 'url(' + this.$store.state.themeObj.top_image + ')'
-				: 'url(static/img/headbg05.jpg)';
+			// 随机背景未就绪时先用零请求的渐变占位（立刻可见，不白屏）
+			if (!this.randomBg) {
+				return {
+					background: 'linear-gradient(160deg, #dfe6ff 0%, #f3f5fb 55%, #eaf1ff 100%)',
+					transform: 'translate3d(0,' + (this.heroShift * 0.32).toFixed(1) + 'px,0) scale(1.08)'
+				};
+			}
 			return {
-				backgroundImage: bg,
+				backgroundImage: 'url(' + this.randomBg + ')',
 				transform: 'translate3d(0,' + (this.heroShift * 0.32).toFixed(1) + 'px,0) scale(1.08)'
 			};
 		}
 	},
 	watch: {
+		randomQuote: function (val) {
+			// 随机文案就位 → 启动打字机（startTypewriter 自带防重）
+			if (val) this.startTypewriter();
+		},
 		// 如果路由有变化，会再次执行该方法
 		'$route': 'routeChange',
 	},
 	created() {
+		this._typedFlag = false;//打字机启动标志（实例属性，非响应式）
+		// 尽早发起随机文案请求（不等 mounted），缩短首屏背景/诗句的等待
 		this.loadRandomHeadline(); //生命周期函数
 		//判断当前页面是否被隐藏
 		var that = this;
@@ -287,15 +339,8 @@ export default {
 
 	},
 	mounted() { //页面元素加载完成
-		var that = this;
-		// 先等随机诗句加载完成（失败也会 resolve 并回退默认值），再启动打字机
-		this.loadRandomHeadline().then(function () {
-			var timer = setTimeout(function () {
-				Typeit(that.$store.state.themeObj.user_start, "#luke"); //打字机效果
-				TypeitLine(that.signatureText, "#signature", 700); //签名打字机效果
-				clearTimeout(timer);
-			}, 500);
-		});
+		// 随机文案请求已在 created 发起；若因时序未发出则这里补一次（幂等）
+		if (!this.randomQuote && !this._headlineRequested) this.loadRandomHeadline();
 		this.onScroll();
 		window.addEventListener('scroll', this.onScroll, { passive: true });
 	},

@@ -5,13 +5,13 @@
         <div class="bgLayer">
             <el-carousel height="100%" indicator-position="none" :interval="5000" arrow="never">
                 <el-carousel-item>
-                    <img src="../../static/img/login-bac0.png" />
+                    <img src="../../static/img/login-bac0.jpg" />
                 </el-carousel-item>
                 <el-carousel-item>
-                    <img src="../../static/img/login-bac1.png" />
+                    <img src="../../static/img/login-bac1.jpg" />
                 </el-carousel-item>
                 <el-carousel-item>
-                    <img src="../../static/img/login-bac2.png" />
+                    <img src="../../static/img/headbg05.jpg" />
                 </el-carousel-item>
             </el-carousel>
         </div>
