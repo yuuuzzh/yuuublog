@@ -77,6 +77,7 @@
 	</div>
 </template>
 <script>
+import request from '@/utils/request.js'
 import { logout } from '../api/user'
 import { removeToken } from '../utils/auth'
 import { getCategoryList } from '../api/category'
