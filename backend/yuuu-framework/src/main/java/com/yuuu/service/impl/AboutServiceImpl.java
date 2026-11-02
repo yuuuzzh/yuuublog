@@ -65,7 +65,8 @@ public class AboutServiceImpl extends ServiceImpl<AboutMapper, About> implements
         queryWrapper.last("limit 1");
         About about = getOne(queryWrapper);
         About result = about == null ? new About() : about;
-        blogCacheManager.set(SystemConstants.ABOUT_KEY, result, SystemConstants.CACHE_TTL_LONG);
+        // 保存时会立即失效；这里用较短 TTL 兜底，避免任何未触发失效的场景下长时间陈旧
+        blogCacheManager.set(SystemConstants.ABOUT_KEY, result, SystemConstants.CACHE_TTL_SHORT);
         return ResponseResult.okResult(result);
     }
 }

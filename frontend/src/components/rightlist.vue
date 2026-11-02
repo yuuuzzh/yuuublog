@@ -15,28 +15,34 @@
         <p>蔚</p>
         <div class="catch-me">
           <div class="">
-            <el-tooltip class="item" content="Github" placement="top">
-              <a :href="catchMeObj.git" target="_blank"><i class="fa fa-fw fa-github"></i></a>
+            <el-tooltip v-if="catchMeObj.github" class="item" content="GitHub" placement="top">
+              <a :href="catchMeObj.github" target="_blank"><i class="fa fa-fw fa-github"></i></a>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="QQ" placement="top">
+            <el-tooltip v-if="catchMeObj.qq" class="item" effect="dark" content="QQ" placement="top">
               <a :href="catchMeObj.qq" target="_blank"><i class="fa fa-fw fa-qq"></i></a>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="微博" placement="top">
-              <a :href="catchMeObj.sina" target="_blank"><i class="fa fa-fw fa-weibo"></i></a>
+            <el-tooltip v-if="catchMeObj.wechatQr" class="item" effect="dark" content="微信" placement="top">
+              <a href="javascript:void(0);" @click="showWechat = true"><i class="fa fa-fw fa-wechat"></i></a>
             </el-tooltip>
           </div>
           <div class="">
-            <el-tooltip class="item" effect="dark" content="微信" placement="top">
-              <a :href="catchMeObj.wechat" target="_blank"><i class="fa fa-fw fa-wechat"></i></a>
+            <el-tooltip v-if="catchMeObj.weibo" class="item" effect="dark" content="微博" placement="top">
+              <a :href="catchMeObj.weibo" target="_blank"><i class="fa fa-fw fa-weibo"></i></a>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="CSDN" placement="top">
+            <el-tooltip v-if="catchMeObj.csdn" class="item" effect="dark" content="CSDN" placement="top">
               <a :href="catchMeObj.csdn" target="_blank"><i class="">C</i></a>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="Gitee" placement="top">
+            <el-tooltip v-if="catchMeObj.gitee" class="item" effect="dark" content="Gitee" placement="top">
               <a :href="catchMeObj.gitee" target="_blank"><i class="">G</i></a>
             </el-tooltip>
           </div>
         </div>
+        <!-- 微信二维码弹窗 -->
+        <el-dialog :visible.sync="showWechat" title="微信扫码添加" width="300px" append-to-body>
+          <div class="wx-qr-box">
+            <img :src="catchMeObj.wechatQr" alt="微信二维码" />
+          </div>
+        </el-dialog>
       </div>
     </section>
     <yuuu-subscribe></yuuu-subscribe>
@@ -93,6 +99,7 @@
 
 <script>
 import { hotArticleList } from "../api/article";
+import { getAbout } from "../api/about.js";
 import tagcloud from "./tagcloud.vue";
 import subscribeBox from "./subscribe.vue";
 import request from "@/utils/request.js"
@@ -109,19 +116,34 @@ export default {
       artCommentList: "", //最新评论
       formattedTime: "",
       myClock: null,
+      // 社交链接由后台「关于我」配置，未配置则不展示对应图标
       catchMeObj: {
-        //个人信息
-        git: "https://github.com/YuuuZzH?tab=repositories",
-        qq: "/static/img/qq.png",
-        sina: "https://weibo.com",
-        wechat: "/static/img/wx.png",
-        csdn: "https://blog.csdn.net/m0_63378258?spm=1000.2115.3001.5343",
-        job: "https://www.baidu.com",
-        gitee:"https://gitee.com/yuuu-zehua",
+        github: '',
+        qq: '',
+        wechatQr: '',
+        weibo: '',
+        csdn: '',
+        gitee: ''
       },
+      showWechat: false,
     };
   },
   methods: {
+    // 社交链接来自后台「关于我」配置；QQ 拼临时会话链接，微信仅存二维码
+    loadSocial: function () {
+      var that = this;
+      getAbout({}).then(function (res) {
+        if (!res) return;
+        that.catchMeObj.github = res.github || '';
+        that.catchMeObj.weibo = res.weibo || '';
+        that.catchMeObj.csdn = res.csdn || '';
+        that.catchMeObj.gitee = res.gitee || '';
+        that.catchMeObj.wechatQr = res.wechatQr || '';
+        // QQ 号 -> 加好友临时会话
+        var qq = (res.qq || '').trim();
+        that.catchMeObj.qq = qq ? 'https://wpa.qq.com/msgrd?v=3&uin=' + qq + '&site=qq&menu=yes' : '';
+      }).catch(function () { });
+    },
     //事件处理器
     toTopfun: function (e) {
       var that = this;
@@ -184,6 +206,7 @@ export default {
   created() {
     //生命周期函数
     var that = this;
+    that.loadSocial();
     window.onscroll = function () {
       var t = document.documentElement.scrollTop || document.body.scrollTop;
       // console.log(t);

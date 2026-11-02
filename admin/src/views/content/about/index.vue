@@ -24,6 +24,32 @@
           <el-form-item label="个人网站" prop="website">
             <el-input v-model="form.website" placeholder="个人主页地址" maxlength="255" />
           </el-form-item>
+          <el-form-item label="社交矩阵">
+            <div class="form-tip">留空则不显示对应图标；QQ 填号即可（前台按临时会话加好友），微信需上传二维码</div>
+          </el-form-item>
+          <el-form-item label="QQ号" prop="qq">
+            <el-input v-model="form.qq" placeholder="QQ 号码，如 123456789" maxlength="64" />
+          </el-form-item>
+          <el-form-item label="微博" prop="weibo">
+            <el-input v-model="form.weibo" placeholder="微博主页地址" maxlength="255" />
+          </el-form-item>
+          <el-form-item label="CSDN" prop="csdn">
+            <el-input v-model="form.csdn" placeholder="CSDN 主页地址" maxlength="255" />
+          </el-form-item>
+          <el-form-item label="Gitee" prop="gitee">
+            <el-input v-model="form.gitee" placeholder="Gitee 主页地址" maxlength="255" />
+          </el-form-item>
+          <el-form-item label="微信二维码">
+            <div class="about-upload">
+              <img v-if="form.wechatQr" :src="form.wechatQr" class="about-avatar" />
+              <i v-else class="el-icon-picture-outline avatar-uploader-icon" />
+              <el-upload class="upload-btn" :show-file-list="false" :http-request="uploadWechatQr"
+                accept="image/png,image/jpg,image/jpeg">
+                <el-button size="small" type="primary">选择图片</el-button>
+              </el-upload>
+              <el-input v-model="form.wechatQr" placeholder="也可直接填写二维码图片地址" />
+            </div>
+          </el-form-item>
           <el-form-item label="技能" prop="skills">
             <el-input v-model="form.skills" type="textarea" :rows="3"
               placeholder="逗号分隔，可写熟练度，如：Java:90,Spring Boot:85,Vue:75" maxlength="512" />
@@ -119,6 +145,12 @@ export default {
         this.form.avatar = response;
       }).catch(error => {
         this.$message.error(error.msg || "上传失败");
+      });
+    },
+    uploadWechatQr(img) {
+      uploadImg(img.file).then(response => {
+        this.form.wechatQr = response;
+        this.$modal.msgSuccess("上传成功");
       });
     },
     uploadCover(img) {

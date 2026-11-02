@@ -43,6 +43,16 @@ public class About implements Serializable {
     private String github;
     //个人网站
     private String website;
+    //QQ号（前台按 wpa 临时会话链接加好友）
+    private String qq;
+    //微信二维码图片地址（微信没有可跳转主页，用扫码添加）
+    private String wechatQr;
+    //微博主页
+    private String weibo;
+    //CSDN 主页
+    private String csdn;
+    //Gitee 主页
+    private String gitee;
     //状态0:正常,1停用
     private String status;
     @TableField(fill = FieldFill.INSERT)
