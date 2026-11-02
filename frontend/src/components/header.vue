@@ -98,6 +98,8 @@ export default {
 			input: '', //input输入内容
 			userInfoObj: '',//用户的信息
 			headBg: 'url(static/img/headbg05.jpg)', //头部背景图
+			randomQuote: '',//首屏随机诗句（来自后台文案池）
+			randomBg: '',//首屏随机背景图
 			headTou: '', //头像
 			projectList: '', //项目列表
 			heroShift: 0, //首屏视差位移（px）
@@ -105,6 +107,19 @@ export default {
 		}
 	},
 	methods: { //事件处理器
+		// 首屏文案池：每次刷新随机取一条诗句与一张背景图（接口为空时用默认值）
+		loadRandomHeadline() {
+			var that = this;
+			request({
+				url: '/headline/random',
+				headers: { isToken: false },
+				method: 'get'
+			}).then(function (res) {
+				if (!res) return;
+				that.randomQuote = res.quote || '';
+				that.randomBg = res.bgImage || '';
+			}).catch(function () { });
+		},
 		handleOpen(key, keyPath) { //分组菜单打开
 			// console.log(key, keyPath);
 		},
@@ -236,7 +251,8 @@ export default {
 		// 如果路由有变化，会再次执行该方法
 		'$route': 'routeChange',
 	},
-	created() { //生命周期函数
+	created() {
+		this.loadRandomHeadline(); //生命周期函数
 		//判断当前页面是否被隐藏
 		var that = this;
 		var hiddenProperty = 'hidden' in document ? 'hidden' :

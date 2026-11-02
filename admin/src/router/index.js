@@ -188,6 +188,16 @@ export const constantRoutes = [
     }]
   },
   {
+    path: '/content/headline',
+    component: Layout,
+    children: [{
+      path: '/',
+      name: 'headline',
+      component: () => import('@/views/content/headline/index'),
+      hidden: true
+    }]
+  },
+  {
     path: '/content/upload',
     component: Layout,
     children: [{
