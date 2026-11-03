@@ -24,9 +24,9 @@
                 <el-carousel-item>
                     <picture>
                         <source type="image/webp" sizes="100vw"
-                            srcset="/static/img/headbg05-750.webp 750w, /static/img/headbg05.webp 1920w" />
-                        <img src="/static/img/headbg05.jpg" alt="" sizes="100vw"
-                            srcset="/static/img/headbg05.jpg 1920w" />
+                            srcset="/static/img/login-bac2-750.webp 750w, /static/img/login-bac2.webp 1920w" />
+                        <img src="/static/img/login-bac2.jpg" alt="" sizes="100vw"
+                            srcset="/static/img/login-bac2.jpg 1920w" />
                     </picture>
                 </el-carousel-item>
             </el-carousel>
