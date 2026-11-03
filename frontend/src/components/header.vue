@@ -109,19 +109,39 @@ export default {
 	},
 	methods: { //事件处理器
 		// 启动首屏打字机（防重：只启动一次）
+		// 浏览器是否支持 WebP（结果缓存在实例上，避免重复检测）
+		supportsWebp: function () {
+			if (this._webpSupport !== undefined) return this._webpSupport;
+			try {
+				this._webpSupport = document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp') === 0;
+			} catch (e) {
+				this._webpSupport = false;
+			}
+			return this._webpSupport;
+		},
 		// 背景图预加载：加载完成后才切换，避免"先空白后突现/半张图"
 		preloadBg: function (url) {
 			var that = this;
 			if (!url) return;
+			// 支持 WebP 时优先加载 .webp（体积只有 jpg 的 1/10），失败自动回退原图
+			var webpUrl = (this.supportsWebp() && /\.jpe?g$/i.test(url)) ? url.replace(/\.jpe?g$/i, '.webp') : '';
+			var candidates = webpUrl ? [webpUrl, url] : [url];
+			that.tryLoadBg(candidates, 0);
+		},
+		tryLoadBg: function (list, idx) {
+			var that = this;
+			if (idx >= list.length) {
+				that.randomBg = '';// 全部失败 → 用渐变占位兜底
+				return;
+			}
 			var img = new Image();
 			img.onload = function () {
-				that.randomBg = url;
+				that.randomBg = list[idx];
 			};
 			img.onerror = function () {
-				// 加载失败则用默认背景（CSS 兜底）
-				that.randomBg = '';
+				that.tryLoadBg(list, idx + 1);
 			};
-			img.src = url;
+			img.src = list[idx];
 		},
 		startTypewriter: function () {
 			var that = this;

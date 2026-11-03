@@ -4,14 +4,24 @@
         <!-- 背景图占满全屏 -->
         <div class="bgLayer">
             <el-carousel height="100%" indicator-position="none" :interval="5000" arrow="never">
+                <!-- picture：支持 WebP 的浏览器加载 .webp（约 1/10 体积），否则自动回退 jpg -->
                 <el-carousel-item>
-                    <img src="../../static/img/login-bac0.jpg" />
+                    <picture>
+                        <source srcset="/static/img/login-bac0.webp" type="image/webp" />
+                        <img src="/static/img/login-bac0.jpg" alt="" />
+                    </picture>
                 </el-carousel-item>
                 <el-carousel-item>
-                    <img src="../../static/img/login-bac1.jpg" />
+                    <picture>
+                        <source srcset="/static/img/login-bac1.webp" type="image/webp" />
+                        <img src="/static/img/login-bac1.jpg" alt="" />
+                    </picture>
                 </el-carousel-item>
                 <el-carousel-item>
-                    <img src="../../static/img/headbg05.jpg" />
+                    <picture>
+                        <source srcset="/static/img/headbg05.webp" type="image/webp" />
+                        <img src="/static/img/headbg05.jpg" alt="" />
+                    </picture>
                 </el-carousel-item>
             </el-carousel>
         </div>
@@ -542,7 +552,9 @@ export default {
     height: 100% !important;
 }
 
+.bgLayer picture,
 .bgLayer img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
