@@ -7,20 +7,26 @@
                 <!-- picture：支持 WebP 的浏览器加载 .webp（约 1/10 体积），否则自动回退 jpg -->
                 <el-carousel-item>
                     <picture>
-                        <source srcset="/static/img/login-bac0.webp" type="image/webp" />
-                        <img src="/static/img/login-bac0.jpg" alt="" />
+                        <source type="image/webp" sizes="100vw"
+                            srcset="/static/img/login-bac0-750.webp 750w, /static/img/login-bac0.webp 1920w" />
+                        <img src="/static/img/login-bac0.jpg" alt="" sizes="100vw"
+                            srcset="/static/img/login-bac0.jpg 1920w" />
                     </picture>
                 </el-carousel-item>
                 <el-carousel-item>
                     <picture>
-                        <source srcset="/static/img/login-bac1.webp" type="image/webp" />
-                        <img src="/static/img/login-bac1.jpg" alt="" />
+                        <source type="image/webp" sizes="100vw"
+                            srcset="/static/img/login-bac1-750.webp 750w, /static/img/login-bac1.webp 1920w" />
+                        <img src="/static/img/login-bac1.jpg" alt="" sizes="100vw"
+                            srcset="/static/img/login-bac1.jpg 1920w" />
                     </picture>
                 </el-carousel-item>
                 <el-carousel-item>
                     <picture>
-                        <source srcset="/static/img/headbg05.webp" type="image/webp" />
-                        <img src="/static/img/headbg05.jpg" alt="" />
+                        <source type="image/webp" sizes="100vw"
+                            srcset="/static/img/headbg05-750.webp 750w, /static/img/headbg05.webp 1920w" />
+                        <img src="/static/img/headbg05.jpg" alt="" sizes="100vw"
+                            srcset="/static/img/headbg05.jpg 1920w" />
                     </picture>
                 </el-carousel-item>
             </el-carousel>

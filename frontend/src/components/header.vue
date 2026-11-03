@@ -123,9 +123,15 @@ export default {
 		preloadBg: function (url) {
 			var that = this;
 			if (!url) return;
-			// 支持 WebP 时优先加载 .webp（体积只有 jpg 的 1/10），失败自动回退原图
-			var webpUrl = (this.supportsWebp() && /\.jpe?g$/i.test(url)) ? url.replace(/\.jpe?g$/i, '.webp') : '';
-			var candidates = webpUrl ? [webpUrl, url] : [url];
+			var candidates = [];
+			var isSmall = window.innerWidth <= 768;
+			var base = url.replace(/\.(jpe?g|webp)$/i, '');
+			// 支持 WebP：移动端 -750.webp（约 20KB）→ 桌面 .webp → 都失败回退原 jpg
+			if (this.supportsWebp()) {
+				if (isSmall) candidates.push(base + '-750.webp');
+				candidates.push(base + '.webp');
+			}
+			candidates.push(url);
 			that.tryLoadBg(candidates, 0);
 		},
 		tryLoadBg: function (list, idx) {
