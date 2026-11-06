@@ -8,13 +8,13 @@
 					<div class="headBox">
 						<el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal"
 							:router="true">
-							<el-menu-item index="/Home"><i class="fa fa-wa fa-home"></i> 首页</el-menu-item>
+							<el-menu-item index="/Home"><i class="fa fa-wa fa-home"></i>首页</el-menu-item>
 							<el-submenu index="/Share">
-								<template slot="title"><i class="fa fa-wa fa-archive"></i> 分类</template>
+								<template slot="title"><i class="fa fa-wa fa-archive"></i>分类</template>
 								<el-menu-item v-for="(item, index) in classListObj" :key="'class1' + index"
 									:index="'/Share?classId=' + item.id">{{ item.name }}</el-menu-item>
 							</el-submenu>
-							<el-menu-item index="/Reward"><i class="fa fa-wa fa-cny"></i> 赞赏</el-menu-item>
+							<el-menu-item index="/Reward"><i class="fa fa-wa fa-cny"></i>赞赏</el-menu-item>
 							<el-menu-item index="/Friendslink"><i class="fa fa-wa fa-users"></i>友链</el-menu-item>
 							<el-menu-item index="/WordBoard"><i class="fa fa-wa fa-users"></i>留言板</el-menu-item>
 						<el-menu-item index="/Archives"><i class="fa fa-wa fa-calendar"></i>归档</el-menu-item>
@@ -422,6 +422,7 @@ export default {
 
 .headBox li .fa-wa {
 	vertical-align: baseline;
+	margin-right: 6px;
 }
 
 .headBox ul li.el-menu-item,
