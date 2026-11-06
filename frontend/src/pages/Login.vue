@@ -111,8 +111,9 @@
                     </div>
                     <div class="field">
                         <label>邮箱</label>
-                        <el-input class="lgInput" type="email" placeholder="you@example.com" v-model="nemail">
-                        </el-input>
+                        <el-autocomplete class="lgInput" type="email" placeholder="you@example.com" v-model="nemail"
+                            :fetch-suggestions="fetchEmailSuggestions" :debounce="0">
+                        </el-autocomplete>
                         <div v-show="nemailErr" class="fieldError">邮箱不能为空</div>
                     </div>
                     <div class="field">
@@ -154,8 +155,9 @@
 
                     <div class="field">
                         <label>邮箱</label>
-                        <el-input class="lgInput" type="text" placeholder="请输入注册邮箱" v-model="emailPassword">
-                        </el-input>
+                        <el-autocomplete class="lgInput" type="text" placeholder="请输入注册邮箱" v-model="emailPassword"
+                            :fetch-suggestions="fetchEmailSuggestions" :debounce="0">
+                        </el-autocomplete>
                         <div v-show="uemailErr" class="fieldError">邮箱不能为空</div>
                     </div>
                     <div class="field">
@@ -194,8 +196,9 @@
 
                     <div class="field">
                         <label>邮箱</label>
-                        <el-input class="lgInput" type="text" placeholder="请输入邮箱" v-model="emailPassword">
-                        </el-input>
+                        <el-autocomplete class="lgInput" type="text" placeholder="请输入邮箱" v-model="emailPassword"
+                            :fetch-suggestions="fetchEmailSuggestions" :debounce="0">
+                        </el-autocomplete>
                         <div v-show="uemailErr" class="fieldError">邮箱不能为空</div>
                     </div>
                     <div class="field">
@@ -227,6 +230,7 @@ import { setToken } from '../utils/auth.js'
 import  encryptPassword  from '../utils/encryptPassword'
 import { getMathCaptcha } from '@/api/captcha.js';
 import request from "@/utils/request.js"
+import { getEmailSuggestions } from '../utils/email.js'
 export default {
     name: 'Login',
     data() { //选项 / 数据
@@ -285,6 +289,9 @@ export default {
         }
     },
     methods: { //事件处理器
+        fetchEmailSuggestions: function (queryString, cb) {
+            cb(getEmailSuggestions(queryString));
+        },
         routeChange: function () {
             var that = this;
             that.login = that.$route.query.login == undefined ? 1 : parseInt(that.$route.query.login);//获取传参的login
@@ -639,6 +646,12 @@ export default {
     font-weight: 500;
     color: var(--text-weak);
     margin-bottom: 7px;
+}
+
+/* el-autocomplete 根节点默认 inline-block，需与其余字段一样撑满卡片宽度 */
+.lgInput.el-autocomplete {
+    display: block;
+    width: 100%;
 }
 
 .lgInput input {

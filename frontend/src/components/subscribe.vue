@@ -4,7 +4,9 @@
         <h1 class="sub-title">订阅更新</h1>
         <p class="sub-desc">留下邮箱，新文章发布时第一时间通知你。</p>
         <div class="sub-form">
-            <input v-model="email" type="email" placeholder="your@email.com" @keyup.enter="doSubscribe" />
+            <el-autocomplete class="sub-email" v-model="email" type="email" placeholder="your@email.com"
+                :fetch-suggestions="fetchEmailSuggestions" :debounce="0"
+                @keydown.enter.native="onEmailEnter" />
             <button type="button" :disabled="loading" @click="doSubscribe">
                 {{ loading ? '提交中' : '订阅' }}
             </button>
@@ -20,6 +22,7 @@
 <script>
 import { subscribe } from '../api/subscribe.js'
 import { getCaptchaImg } from '../api/captcha.js'
+import { getEmailSuggestions } from '../utils/email.js'
 
 export default {
     name: 'SubscribeBox',
@@ -36,6 +39,14 @@ export default {
         this.refreshCaptcha()
     },
     methods: {
+        fetchEmailSuggestions(queryString, cb) {
+            cb(getEmailSuggestions(queryString));
+        },
+        onEmailEnter(e) {
+            // 补全组件已用本次回车选中候选（内部 preventDefault），此时只补全邮箱、不提交订阅
+            if (e.defaultPrevented || e.isComposing) return;
+            this.doSubscribe();
+        },
         refreshCaptcha() {
             var that = this;
             that.captchaUrl = '';
@@ -118,6 +129,18 @@ export default {
 
 .sub-form input:focus {
     border-color: var(--brand);
+}
+
+/* 补全组件根节点为 inline-block，需在 flex 中撑开，并保持与原输入框等高 */
+.sub-form .el-autocomplete {
+    flex: 1;
+    min-width: 0;
+}
+
+.sub-form .el-autocomplete .el-input__inner {
+    box-sizing: border-box;
+    height: 34px;
+    line-height: 34px;
 }
 
 .sub-form button {
