@@ -3,6 +3,7 @@
     <div>
         <yuuu-navbar></yuuu-navbar>
         <div class="container">
+            <ImageWall></ImageWall>
             <el-row  :gutter="30">
                 <el-col :sm="24" :md="16" style="transition:all .5s ease-out;margin-bottom:30px;">
                     <yuuu-articlelist></yuuu-articlelist>
@@ -19,6 +20,7 @@
 import header from '../components/header.vue'
 import articlelist from '../components/articlelist.vue'
 import rightlist from '../components/rightlist.vue'
+import ImageWall from '../components/leibox/ImageWall.vue'
     export default {
         name:'Home',
         data() { //选项 / 数据
@@ -33,6 +35,7 @@ import rightlist from '../components/rightlist.vue'
             'yuuu-navbar':header,
             'yuuu-articlelist':articlelist,
             'yuuu-rightlist':rightlist,
+            ImageWall,
         },
         created() { //生命周期函数
 

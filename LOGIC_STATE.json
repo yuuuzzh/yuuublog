@@ -1,0 +1,33 @@
+{
+  "updated": "2026-11-10",
+  "topic": "LeiBox 组件库接入博客前端（影像墙 + Hero 背景图占位）",
+  "stack_constraints": {
+    "vue": "2.7",
+    "bundler": "webpack 3 + vue-loader 13 + Babel 6 (preset-env / stage-2) + UglifyJS",
+    "why_it_matters": "LeiBox 的 Vue 包是 <script setup lang=ts> 的 Vue 3 SFC，且引擎依赖 TypeScript 运行时与 ?. / ?? / matchAll；本项目三者均不支持，必须移植薄壳与共享运行时后才能使用。"
+  },
+  "removed": [
+    {
+      "slug": "blue-fluted-glass",
+      "reason": "用户确认流体叠加在背景图上观感怪异，已删除 HeroFluid.vue 与 BlueFlutedGlassEngine.js，并还原 header.vue 中的模板/导入/注册三处引用",
+      "note": "原 shader 输出 vec4(color,1.0) 且 context alpha:false，是遮挡背景图的根因；若日后重新引入需先做 alpha 透明化"
+    }
+  ],
+  "hero_background": "header.vue 的 heroBgStyle 在后台 randomBg 未就绪时用 /static/img/headbg05.webp 占位（原为纯渐变），保证首屏始终有真实背景图；线上有 randomBg 时仍以后台配置为准",
+  "integrated": [
+    {
+      "slug": "image-accordion",
+      "entry": "frontend/src/components/leibox/ImageWall.vue",
+      "engine": "frontend/src/components/leibox/image-accordion/ImageAccordionEngine.js",
+      "used_by": "frontend/src/pages/Home.vue (内容区顶部)",
+      "adaptations": "253KB 内嵌演示图替换为 /static/img/bg0*.webp / 容器改 1080x320 全宽 / 演示底色透明化"
+    }
+  ],
+  "shared_runtime": "frontend/src/components/leibox/motion-runtime.js（由 motion-runtime.ts 手工降级；勿改回 TS 或 class extends 原生 Observer）",
+  "verified": {
+    "npm_run_build": "EXIT=0",
+    "runtime": "移除流体层后 Hero 仅剩真实背景图 + 原生遮罩，无 WebGL 层；影像墙 5 图渲染正常；干净环境仅剩本地后端未启动导致的 /api 404",
+    "lints": 0
+  },
+  "pending": "视觉类改动：需用户在浏览器确认后再 commit + push + ./scripts/deploy-local.sh frontend"
+}

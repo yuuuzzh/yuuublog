@@ -137,7 +137,7 @@ export default {
 		tryLoadBg: function (list, idx) {
 			var that = this;
 			if (idx >= list.length) {
-				that.randomBg = '';// 全部失败 → 用渐变占位兜底
+				that.randomBg = '';// 全部失败 → 用站内静态图占位兜底
 				return;
 			}
 			var img = new Image();
@@ -314,10 +314,10 @@ export default {
 			return (themeObj && themeObj.autograph) ? themeObj.autograph : '且将新火试新茶，诗酒趁年华';
 		},
 		heroBgStyle() {
-			// 随机背景未就绪时先用零请求的渐变占位（立刻可见，不白屏）
+			// 随机背景未就绪时用站内静态图占位，保证首屏始终有真实背景可看
 			if (!this.randomBg) {
 				return {
-					background: 'linear-gradient(160deg, #dfe6ff 0%, #f3f5fb 55%, #eaf1ff 100%)',
+					backgroundImage: 'url(/static/img/headbg05.webp)',
 					transform: 'translate3d(0,' + (this.heroShift * 0.32).toFixed(1) + 'px,0) scale(1.08)'
 				};
 			}
