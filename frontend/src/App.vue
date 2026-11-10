@@ -314,6 +314,12 @@ video {
 body {
     font-family: Arial, "STHeiti", Helvetica, sans-serif;
     background: var(--bg);
+    /* 页面氛围：两团极淡的品牌色光斑，固定不随滚动，纯装饰不挡交互 */
+    background-image:
+        radial-gradient(760px 520px at 8% -4%, rgba(79, 140, 255, .16), transparent 70%),
+        radial-gradient(680px 480px at 96% 12%, rgba(255, 122, 198, .13), transparent 72%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
     font-size: 14px;
     color: var(--text) !important;
     min-height: 100vh;
@@ -321,6 +327,13 @@ body {
     overflow-x: hidden;
     -webkit-overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
+}
+
+/* 暗色下收敛光斑强度，避免深色底上出现发亮的色块 */
+[data-theme='dark'] body {
+    background-image:
+        radial-gradient(760px 520px at 8% -4%, rgba(110, 168, 255, .13), transparent 70%),
+        radial-gradient(680px 480px at 96% 12%, rgba(255, 143, 208, .10), transparent 72%);
 }
 
 table {

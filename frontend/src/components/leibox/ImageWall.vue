@@ -71,6 +71,16 @@ export default {
     color: var(--text);
 }
 
+.wall-head h2::after {
+    content: '';
+    display: block;
+    width: 46px;
+    height: 3px;
+    margin-top: 9px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--brand), var(--accent));
+}
+
 .wall-head p {
     margin: 0;
     font-size: 13px;

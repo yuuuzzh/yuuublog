@@ -29,5 +29,11 @@
     "runtime": "移除流体层后 Hero 仅剩真实背景图 + 原生遮罩，无 WebGL 层；影像墙 5 图渲染正常；干净环境仅剩本地后端未启动导致的 /api 404",
     "lints": 0
   },
-  "pending": "视觉类改动：需用户在浏览器确认后再 commit + push + ./scripts/deploy-local.sh frontend"
+  "round2": {
+    "deployed": "c3b9ff7 已 push 并执行 ./scripts/deploy-local.sh frontend；本地 dist / 服务器 dist / 线上 HTTP 三处产物一致",
+    "style_changes": "App.vue 全局氛围光晕（亮暗各一套强度）、articlelist.vue 卡片 hover 渐变细描边（@supports + mask 保护）、ImageWall.vue 标题渐变短线",
+    "components_evaluated": "stacked-metadata / ai-generating / tactile-push-button 可用但本轮未接；fluid-tooltip 与 collection-layout-morph 需新增 gsap 依赖已排除；pixel-toggle 二态与现有 auto/light/dark 三态冲突",
+    "verified": "npm run build EXIT=0、lints 0、亮暗主题截图、mask 支持 true；卡片渐变描边因本地 /api 404 无文章数据，仅验证规则已编译与浏览器支持，实际 hover 观感待确认"
+  },
+  "pending": "第二轮视觉改动：需用户在浏览器确认后再 commit + push + ./scripts/deploy-local.sh frontend"
 }

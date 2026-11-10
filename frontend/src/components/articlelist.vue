@@ -172,6 +172,29 @@ export default {
     opacity: 1;
 }
 
+/* hover 渐变细描边：仅在支持 mask 组合时启用，避免旧浏览器被整块渐变盖住卡片 */
+@supports ((-webkit-mask-composite: xor) or (mask-composite: exclude)) {
+    .article-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(120deg, var(--brand), var(--brand-2) 45%, var(--accent));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity .35s var(--ease);
+        pointer-events: none;
+    }
+
+    .article-card:hover::after {
+        opacity: .55;
+    }
+}
+
 .card-cover {
     position: relative;
     flex: 0 0 264px;
