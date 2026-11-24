@@ -93,6 +93,9 @@ TS=$(date +%s)
 BK=/app/deploy/backup/$TS
 mkdir -p "$BK"
 
+# 只保留最近 5 次部署备份，避免 backup 目录无界增长
+ls -1td "$(dirname "$BK")"/*/ 2>/dev/null | tail -n +6 | xargs -r rm -rf
+
 APPLIED=0
 if [ "$SCOPE" = "backend" ] || [ "$SCOPE" = "all" ]; then
   systemctl stop yuuu-admin yuuu-blog || true
